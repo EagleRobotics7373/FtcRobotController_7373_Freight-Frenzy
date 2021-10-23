@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.library.vision;
+package org.firstinspires.ftc.teamcode.library.vision.base;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 
