@@ -23,8 +23,7 @@ public class ThinBotTest extends OpMode {
     public void loop(){
         double vertical;
         double horizontal;
-        double pivot;
-        double speed;
+        double pivot;        double speed;
 
         //Speed Controls
         if (gamepad1.right_bumper)      speed = 1;
