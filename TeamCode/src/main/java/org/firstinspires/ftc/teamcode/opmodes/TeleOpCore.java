@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.arcrobotics.ftclib.kotlin.extensions.gamepad.GamepadExExtKt;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -37,18 +40,12 @@ public class TeleOpCore extends OpMode {
 
     public static double defaultCarouselSpeed = -0.25;
 
-    private ToggleButtonWatcher gamepad2_dpadUp;
-    private ToggleButtonWatcher gamepad2_dpadDown;
-    private ToggleButtonWatcher gamepad2_buttonX;
+    private final GamepadEx gamepad1Ex = new GamepadEx(gamepad1);
+    private final GamepadEx gamepad2Ex = new GamepadEx(gamepad1);
 
     @Override
     public void init(){
         robot = new ExtThinBot(hardwareMap);
-//        robot.carouselMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        robot.carouselMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(p, i, d, f));
-        gamepad2_dpadUp = new ToggleButtonWatcher(() -> gamepad2.dpad_up);
-        gamepad2_dpadDown = new ToggleButtonWatcher(() -> gamepad2.dpad_down);
-        gamepad2_buttonX = new ToggleButtonWatcher(() -> gamepad2.x);
     }
 
 
@@ -67,9 +64,9 @@ public class TeleOpCore extends OpMode {
         else if (gamepad2.left_bumper) robot.carouselMotor.setPower(defaultCarouselSpeed);
         else robot.carouselMotor.setPower(0);
 
-        if (gamepad2_dpadUp.invoke()) defaultCarouselSpeed += 0.05;
-        if (gamepad2_dpadDown.invoke()) defaultCarouselSpeed -= 0.05;
-        if (gamepad2_buttonX.invoke()) defaultCarouselSpeed *= -1;
+        if (gamepad2Ex.wasJustPressed(GamepadKeys.Button.DPAD_UP)) defaultCarouselSpeed += 0.05;
+        if (gamepad2Ex.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) defaultCarouselSpeed -= 0.05;
+        if (gamepad2Ex.wasJustPressed(GamepadKeys.Button.X)) defaultCarouselSpeed *= -1;
         telemetry.addData("Carousel speed", defaultCarouselSpeed);
         telemetry.addData("Carousel side", defaultCarouselSpeed < 0 ? "BLUE":"RED");
 
@@ -101,5 +98,8 @@ public class TeleOpCore extends OpMode {
         robot.backRightMotor.setPower(pivot - vertical - horizontal);
         robot.frontLeftMotor.setPower(pivot + vertical + horizontal);
         robot.backLeftMotor.setPower(pivot + vertical - horizontal);
+
+        gamepad1Ex.readButtons();
+        gamepad2Ex.readButtons();
     }
 }
