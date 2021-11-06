@@ -6,15 +6,15 @@ import com.acmerobotics.dashboard.config.Config;
 public class OdometryConstants {
 
     public static double leftXcm = -1.6;
-    public static double leftYcm = 18.2;
+    public static double leftYcm = 12.5;
     public static double leftAngleDeg = 180.0;
 
     public static double rightXcm = -1.6;
     public static double rightYcm = -19.6;
     public static double rightAngleDeg = 180.0;
 
-    public static double rearXcm = -15.5;
-    public static double rearYcm = -0.3;
+    public static double rearXcm = 0;
+    public static double rearYcm = 0;
     public static double rearAngleDeg = -90;
 
     public static boolean reverseOutput = false;
