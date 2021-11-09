@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
 import kotlin.math.absoluteValue
 
 @TeleOp(name="TeleOpCore (Kotlin)")
-class TeleOpCoreKt: OpMode() {
+class TeleOpCore: OpMode() {
 
     lateinit var robot: ExtThinBot
     val gamepad1Ex = GamepadEx(gamepad1)
@@ -36,41 +36,45 @@ class TeleOpCoreKt: OpMode() {
 
         // Control deposit servo
         when {
-            gamepad2.a -> robot.outServo.position = 0.0
-            gamepad2.b -> robot.outServo.position = 0.0
+            gamepad2.a -> robot.depositServo.position = 0.0
+            gamepad2.b -> robot.depositServo.position = 0.0
         }
 
-        // Control first-stage intake motor
-        robot.intakeMotor.power = when {
-            gamepad2.left_trigger > 0.05 -> -gamepad2.left_trigger.toDouble()
+        // Control both intake motors
+        val dualIntakeMotorPower = when {
+            gamepad2.left_trigger > 0.05 && !gamepad2.right_bumper -> -gamepad2.left_trigger.toDouble()
             gamepad2.right_trigger > 0.05 -> gamepad2.right_trigger.toDouble()
             gamepad1.left_trigger > 0.05 -> gamepad1.left_trigger.toDouble()
             gamepad1.right_trigger > 0.05 -> gamepad1.right_trigger.toDouble()
             else -> 0.0
         }
+        if (dualIntakeMotorPower > 0)
+            robot.fullIntakeSystem.intakeManual(dualIntakeMotorPower)
+        else if (!gamepad2.right_bumper)
+            robot.fullIntakeSystem.intakeManual(gamepad2.left_stick_y.toDouble(), gamepad2.right_stick_y.toDouble())
+        else
+            robot.fullIntakeSystem.intakeManual(0.0)
 
         // Control carousel motor
         robot.carouselMotor.power = when {
-            gamepad2.left_stick_y.absoluteValue > 0.05 -> gamepad2.left_stick_y.toDouble()
+            gamepad2.right_bumper && gamepad2.left_stick_y.absoluteValue > 0.05 -> gamepad2.left_stick_y.toDouble()
             gamepad2.left_bumper -> defaultCarouselSpeed
             else -> 0.0
         }
 
         // Adjust default carousel speed
-        when {
-            gamepad2Ex.wasJustPressed(GamepadKeys.Button.DPAD_UP) -> defaultCarouselSpeed += 0.05
-            gamepad2Ex.wasJustPressed(GamepadKeys.Button.DPAD_DOWN) -> defaultCarouselSpeed -= 0.05
-            gamepad2Ex.wasJustPressed(GamepadKeys.Button.X) -> defaultCarouselSpeed *= -1.0
+        if (gamepad2.right_bumper) {
+            when {
+                gamepad2Ex.wasJustPressed(GamepadKeys.Button.DPAD_UP) -> defaultCarouselSpeed += 0.05
+                gamepad2Ex.wasJustPressed(GamepadKeys.Button.DPAD_DOWN) -> defaultCarouselSpeed -= 0.05
+                gamepad2Ex.wasJustPressed(GamepadKeys.Button.X) -> defaultCarouselSpeed *= -1.0
+            }
         }
 
-        // TODO: Control linear actuator motor (not implemented in hardware)
-        robot.linearActuatorMotor.power = gamepad2.right_stick_y * 0.20
-
-        // TODO: Control team scoring element servo (not implemented in hardware)
-        when {
-            gamepad2.x -> robot.linearActuatorServo.position = 1.0
-            gamepad2.y -> robot.linearActuatorServo.position = 0.0
-        }
+        // Control deposit lift
+        robot.fullIntakeSystem.depositLiftManual(
+                if (gamepad2.right_bumper) gamepad2.right_stick_y.toDouble() else 0.0
+        )
 
         // Adjust drivetrain speed
         when {
