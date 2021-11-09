@@ -5,8 +5,8 @@
             <Matrix12vMotor name="frontLeftMotor" port="3" />
             <Matrix12vMotor name="backLeftMotor" port="2" />
 
-            <Matrix12vMotor name="intakeMotor0" port="0" />     // odometry (side)
-            <Matrix12vMotor name="intakeMotor1" port="1" />     // odometry (center)
+            <Matrix12vMotor name="intakeMotor1" port="0" />     // odometry (side)
+            <Matrix12vMotor name="intakeMotor2" port="1" />     // odometry (center)
 
             <Servo name="linearActuatorServo" port="5"/>
         </LynxModule>
