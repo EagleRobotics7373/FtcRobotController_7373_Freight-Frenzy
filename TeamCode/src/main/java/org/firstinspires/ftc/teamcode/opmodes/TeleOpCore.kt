@@ -99,6 +99,9 @@ class TeleOpCore: OpMode() {
         robot.frontLeftMotor.power = pivot + vertical + horizontal
         robot.backLeftMotor.power = pivot + vertical - horizontal
 
+        telemetry.addData("Carousel speed", defaultCarouselSpeed)
+        telemetry.addData("Carousel side", if (defaultCarouselSpeed < 0) "BLUE" else "RED")
+        telemetry.addLine()
         telemetry.addData("Deposit lift power", depositLiftPower)
         telemetry.addData("Deposit lift position", robot.depositLiftMotor.currentPosition)
         telemetry.addData("Combined intake motor power", dualIntakeMotorPower)
