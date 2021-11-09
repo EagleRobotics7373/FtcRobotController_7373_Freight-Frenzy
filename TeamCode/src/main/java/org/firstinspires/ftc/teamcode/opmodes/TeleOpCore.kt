@@ -74,7 +74,7 @@ class TeleOpCore: OpMode() {
         // Control deposit lift
         val depositLiftPower = if (gamepad2.right_bumper) gamepad2.right_stick_y.toDouble() else 0.0
         robot.fullIntakeSystem.depositLiftManual(depositLiftPower)
-        if (gamepad2.y) robot.fullIntakeSystem.resetDepositZero()
+        if (gamepad2Ex.wasJustPressed(GamepadKeys.Button.Y)) robot.fullIntakeSystem.resetDepositZero()
 
         // Adjust drivetrain speed
         when {
