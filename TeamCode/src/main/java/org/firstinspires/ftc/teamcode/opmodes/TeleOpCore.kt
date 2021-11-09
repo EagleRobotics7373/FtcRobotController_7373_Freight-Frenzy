@@ -39,8 +39,8 @@ class TeleOpCore: OpMode() {
 
         // Control deposit servo
         when {
-            gamepad2.a -> robot.depositServo.position = 0.0
-            gamepad2.b -> robot.depositServo.position = 0.0
+            gamepad2.a -> robot.depositServo.position = depositServoOut
+            gamepad2.b -> robot.depositServo.position = depositServoIn
         }
 
         // Control both intake motors
