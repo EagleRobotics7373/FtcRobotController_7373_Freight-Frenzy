@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx
 import com.arcrobotics.ftclib.gamepad.GamepadKeys
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
+import com.qualcomm.robotcore.hardware.Gamepad
 import org.firstinspires.ftc.teamcode.library.functions.DashboardVar
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
 import kotlin.math.absoluteValue
@@ -12,8 +13,8 @@ import kotlin.math.absoluteValue
 class TeleOpCore: OpMode() {
 
     lateinit var robot: ExtThinBot
-    val gamepad1Ex = GamepadEx(gamepad1)
-    val gamepad2Ex = GamepadEx(gamepad2)
+    lateinit var gamepad1Ex: GamepadEx
+    lateinit var gamepad2Ex: GamepadEx
 
     private var reverse by DashboardVar(false, "reverse", this::class)
     private var speed by DashboardVar(1, "speed", this::class) {it in 1..3}
@@ -27,6 +28,8 @@ class TeleOpCore: OpMode() {
 
     override fun init() {
         robot = ExtThinBot(hardwareMap)
+        gamepad1Ex = GamepadEx(gamepad1)
+        gamepad2Ex = GamepadEx(gamepad2)
     }
 
     override fun loop() {
@@ -74,7 +77,7 @@ class TeleOpCore: OpMode() {
         // Control deposit lift
         val depositLiftPower = if (gamepad2.right_bumper) gamepad2.right_stick_y.toDouble() else 0.0
         robot.fullIntakeSystem.depositLiftManual(depositLiftPower)
-        if (gamepad2Ex.wasJustPressed(GamepadKeys.Button.Y)) robot.fullIntakeSystem.resetDepositZero()
+        if (gamepad2.y) robot.fullIntakeSystem.resetDepositZero()
 
         // Adjust drivetrain speed
         when {
