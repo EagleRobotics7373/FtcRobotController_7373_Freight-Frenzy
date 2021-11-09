@@ -72,9 +72,8 @@ class TeleOpCore: OpMode() {
         }
 
         // Control deposit lift
-        robot.fullIntakeSystem.depositLiftManual(
-                if (gamepad2.right_bumper) gamepad2.right_stick_y.toDouble() else 0.0
-        )
+        val depositLiftPower = if (gamepad2.right_bumper) gamepad2.right_stick_y.toDouble() else 0.0
+        robot.fullIntakeSystem.depositLiftManual(depositLiftPower)
 
         // Adjust drivetrain speed
         when {
@@ -99,5 +98,9 @@ class TeleOpCore: OpMode() {
         robot.backRightMotor.power = pivot - vertical - horizontal
         robot.frontLeftMotor.power = pivot + vertical + horizontal
         robot.backLeftMotor.power = pivot + vertical - horizontal
+
+        telemetry.addData("Deposit lift power", depositLiftPower)
+        telemetry.addData("Deposit lift position", robot.depositLiftMotor.currentPosition)
+        telemetry.addData("Combined intake motor power", dualIntakeMotorPower)
     }
 }
