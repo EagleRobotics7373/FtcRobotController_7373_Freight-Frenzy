@@ -4,12 +4,11 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
 
 @com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Estacionar", group = "Main")
-class ParkingAutonomous : BaseAutonomous() {
+class ParkingAutonomous : BaseAutonomous<ExtThinBot>() {
 
     /*
         VARIABLES: Hardware and Control
      */
-    private lateinit var robot           : ExtThinBot
 
     /*
         VARIABLES: Menu Options

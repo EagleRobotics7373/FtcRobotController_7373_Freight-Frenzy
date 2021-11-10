@@ -15,12 +15,11 @@ import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
 import org.firstinspires.ftc.teamcode.library.vision.freightfrenzy.ColorMarkerVisionPipeline
 
 @com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Autonomous", group = "Main")
-class DualLocationAutonomous : BaseAutonomous() {
+class DualLocationAutonomous : BaseAutonomous<ExtThinBot>() {
 
     /*
         VARIABLES: Hardware and Control
      */
-    private lateinit var robot           : ExtThinBot
 
 
 //    private lateinit var cvContainer     : OpenCvContainer<ColorMarkerVisionPipeline>

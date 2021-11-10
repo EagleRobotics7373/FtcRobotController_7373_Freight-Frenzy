@@ -20,7 +20,7 @@ abstract class BaseRobot(protected val hardwareMap: HardwareMap) {
     // Robot Systems Variables
      @JvmField val holonomic            : Holonomic = HolonomicImpl(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor)
 
-//     abstract val holonomicRR           : HolonomicRR
+     abstract val holonomicRR           : HolonomicRR?
 
      protected inline fun <reified T> hwInit(name:String): T = hardwareMap.get(T::class.java, name)
 

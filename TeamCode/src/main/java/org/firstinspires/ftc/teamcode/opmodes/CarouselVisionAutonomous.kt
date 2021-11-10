@@ -22,17 +22,11 @@ import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
 import org.firstinspires.ftc.teamcode.library.vision.freightfrenzy.ColorMarkerVisionPipeline
 
 @com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Vision Autonomous", group = "Main")
-class CarouselVisionAutonomous : BaseAutonomous() {
+class CarouselVisionAutonomous : BaseAutonomous<ExtThinBot>() {
 
     /*
         VARIABLES: Hardware and Control
      */
-    private lateinit var robot           : ExtThinBot
-
-
-//    private lateinit var cvContainer     : OpenCvContainer<ColorMarkerVisionPipeline>
-
-//    private lateinit var player          : ExtDirMusicPlayer
 
     /*
         VARIABLES: Menu Options
@@ -56,45 +50,42 @@ class CarouselVisionAutonomous : BaseAutonomous() {
 
         while (opModeIsActive()) {
             val contourResult = cvContainer.pipeline.contourResult?.standardized
-            if (contourResult != null) {
+            depositPosition = if (contourResult != null) {
                 val center = (contourResult.max.x + contourResult.min.x) / 2
-                if (center < 1.0/3.0) {
-                    depositPosition = LOW
-                } else if (center < 2.0/3.0) {
-                    depositPosition = MIDDLE
-                } else depositPosition = HIGH
+                if (center < 0.33) LOW
+                else if (center < 0.66) MIDDLE
+                else HIGH
+            } else HIGH
 
-            } else depositPosition = HIGH
-            val startPose = Pose2d(
+            robot.holonomicRR.poseEstimate = Pose2d(
                     -36.0,
                     (-63.0).reverseIf(allianceColor == BLUE),
                     (Math.PI / 2).reverseIf(allianceColor == BLUE) //startingHeading
             )
 
-            TrajectoryBuilder(startPose, false, BASE_CONSTRAINTS)
+            builder()
                     .strafeTo(Vector2d(-14.5, (-46.9).reverseIf(allianceColor == BLUE)))
                     .splineToConstantHeading(Vector2d(-12.5, (-43.1).reverseIf(allianceColor == BLUE)), (Math.PI / 2).reverseIf(allianceColor == BLUE))
-                    .build()
+                    .buildAndRun()
 
             //Drop Off Pre-Load
             robot.fullIntakeSystem.depositLiftAuto(depositPosition, 1.0)
             robot.depositServo.position = 0.32
 
-            TrajectoryBuilder(startPose, false, BASE_CONSTRAINTS)
+            builder()
                     .strafeTo(Vector2d(-63.0, (-53.0).reverseIf(allianceColor == BLUE)))
-                    .build()
+                    .buildAndRun()
 
             //Turn Carousel
             robot.carouselMotor.velocity = (0.5).reverseIf(allianceColor == BLUE)
             sleep(1000)
             robot.carouselMotor.velocity = 0.0
 
-            TrajectoryBuilder(startPose, false, BASE_CONSTRAINTS)
-                    .splineToConstantHeading(Vector2d(-62.0, (-36.0).reverseIf(allianceColor == BLUE)), (Math.PI / 2).reverseIf (allianceColor == BLUE))
-                    .build()
+            builder()
+                    .strafeTo(Vector2d(-63.0, (-53.0).reverseIf(allianceColor == BLUE)))
+                    .buildAndRun()
         }
-
     }
 
-
+    private infix fun Double.reverseIf(testColor: AllianceColor) : Double = if (allianceColor == testColor) -this else this
 }
