@@ -56,7 +56,7 @@ class CarouselVisionAutonomous : BaseAutonomous() {
 
         while (opModeIsActive()) {
             val contourResult = cvContainer.pipeline.contourResult?.standardized
-            if (contourResult == null) {} else {
+            if (contourResult != null) {
                 val center = (contourResult.max.x + contourResult.min.x) / 2
                 if (center < 1.0/3.0) {
                     depositPosition = LOW
@@ -64,34 +64,34 @@ class CarouselVisionAutonomous : BaseAutonomous() {
                     depositPosition = MIDDLE
                 } else depositPosition = HIGH
 
-                val startPose = Pose2d(
-                        -36.0,
-                        (-63.0).reverseIf(allianceColor == BLUE),
-                        (Math.PI / 2).reverseIf(allianceColor == BLUE) //startingHeading
-                )
+            } else depositPosition = HIGH
+            val startPose = Pose2d(
+                    -36.0,
+                    (-63.0).reverseIf(allianceColor == BLUE),
+                    (Math.PI / 2).reverseIf(allianceColor == BLUE) //startingHeading
+            )
 
-                TrajectoryBuilder(startPose, false, BASE_CONSTRAINTS)
-                        .strafeTo(Vector2d(-14.5, (-46.9).reverseIf(allianceColor == BLUE)))
-                        .splineToConstantHeading(Vector2d(-12.5, (-43.1).reverseIf(allianceColor == BLUE)), (Math.PI / 2).reverseIf(allianceColor == BLUE))
-                        .build()
+            TrajectoryBuilder(startPose, false, BASE_CONSTRAINTS)
+                    .strafeTo(Vector2d(-14.5, (-46.9).reverseIf(allianceColor == BLUE)))
+                    .splineToConstantHeading(Vector2d(-12.5, (-43.1).reverseIf(allianceColor == BLUE)), (Math.PI / 2).reverseIf(allianceColor == BLUE))
+                    .build()
 
-                //Drop Off Pre-Load
-                robot.fullIntakeSystem.depositLiftAuto(depositPosition, 1.0)
-                robot.depositServo.position = 0.32
+            //Drop Off Pre-Load
+            robot.fullIntakeSystem.depositLiftAuto(depositPosition, 1.0)
+            robot.depositServo.position = 0.32
 
-                TrajectoryBuilder(startPose, false, BASE_CONSTRAINTS)
-                        .strafeTo(Vector2d(-63.0, (-53.0).reverseIf(allianceColor == BLUE)))
-                        .build()
+            TrajectoryBuilder(startPose, false, BASE_CONSTRAINTS)
+                    .strafeTo(Vector2d(-63.0, (-53.0).reverseIf(allianceColor == BLUE)))
+                    .build()
 
-                //Turn Carousel
-                robot.carouselMotor.velocity = (0.5).reverseIf(allianceColor == BLUE)
-                sleep(1000)
-                robot.carouselMotor.velocity = 0.0
+            //Turn Carousel
+            robot.carouselMotor.velocity = (0.5).reverseIf(allianceColor == BLUE)
+            sleep(1000)
+            robot.carouselMotor.velocity = 0.0
 
-                TrajectoryBuilder(startPose, false, BASE_CONSTRAINTS)
-                        .splineToConstantHeading(Vector2d(-62.0, (-36.0).reverseIf(allianceColor == BLUE)), (Math.PI / 2).reverseIf (allianceColor == BLUE))
-                        .build()
-            }
+            TrajectoryBuilder(startPose, false, BASE_CONSTRAINTS)
+                    .splineToConstantHeading(Vector2d(-62.0, (-36.0).reverseIf(allianceColor == BLUE)), (Math.PI / 2).reverseIf (allianceColor == BLUE))
+                    .build()
         }
 
     }
