@@ -45,9 +45,9 @@ class TeleOpCore: OpMode() {
 
         // Control both intake motors
         val dualIntakeMotorPower = when {
-            gamepad2.left_trigger > 0.05 && !gamepad2.right_bumper -> -gamepad2.left_trigger.toDouble()
+            gamepad2.left_trigger > 0.05 -> -gamepad2.left_trigger.toDouble()
             gamepad2.right_trigger > 0.05 -> gamepad2.right_trigger.toDouble()
-            gamepad1.left_trigger > 0.05 -> gamepad1.left_trigger.toDouble()
+            gamepad1.left_trigger > 0.05 -> -gamepad1.left_trigger.toDouble()
             gamepad1.right_trigger > 0.05 -> gamepad1.right_trigger.toDouble()
             else -> 0.0
         }
