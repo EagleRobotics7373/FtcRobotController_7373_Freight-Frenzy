@@ -1,9 +1,9 @@
 package org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints;
-import com.qualcomm.robotcore.hardware.PIDCoefficients;
 
 @Config
 public class DriveConstantsThinBot {
@@ -21,7 +21,7 @@ public class DriveConstantsThinBot {
     public static Pose2d globalPoseEstimate = null;
 
     public static boolean RUN_USING_ENCODER = true;
-    public static com.qualcomm.robotcore.hardware.PIDCoefficients MOTOR_VELO_PID = new com.qualcomm.robotcore.hardware.PIDCoefficients(40, 0, 20);
+    public static PIDCoefficients MOTOR_VELO_PID = new PIDCoefficients(40, 0, 20);
 
     public static DriveConstraints BASE_CONSTRAINTS =
             new DriveConstraints(
@@ -30,13 +30,13 @@ public class DriveConstantsThinBot {
                     Math.PI, Math.PI, 0.0
             );
 
-    public static com.qualcomm.robotcore.hardware.PIDCoefficients TRANSLATIONAL_X_PID =
-            new com.qualcomm.robotcore.hardware.PIDCoefficients(4.2, 0.0, 0.4);
+    public static PIDCoefficients TRANSLATIONAL_X_PID =
+            new PIDCoefficients(4.2, 0.0, 0.4);
 
-    public static com.qualcomm.robotcore.hardware.PIDCoefficients TRANSLATIONAL_Y_PID =
-            new com.qualcomm.robotcore.hardware.PIDCoefficients(3.5, 0.0, 0.1);
+    public static PIDCoefficients TRANSLATIONAL_Y_PID =
+            new PIDCoefficients(3.5, 0.0, 0.1);
 
-    public static com.qualcomm.robotcore.hardware.PIDCoefficients HEADING_PID =
+    public static PIDCoefficients HEADING_PID =
             new PIDCoefficients(4.5, 0.1, 0.25);
 
     public static double rpmToVelocity(double rpm) {
