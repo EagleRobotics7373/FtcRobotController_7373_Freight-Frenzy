@@ -62,8 +62,8 @@ class FullIntakeSystem(
 
     enum class DepositPosition(val ticks: Int) {
         LOW(0),
-        MIDDLE(10),
-        HIGH(20),
-        TSE(30);
+        MIDDLE(600),
+        HIGH(850),
+        TSE(0);
     }
 }

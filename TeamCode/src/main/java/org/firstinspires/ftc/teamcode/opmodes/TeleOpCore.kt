@@ -4,9 +4,11 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx
 import com.arcrobotics.ftclib.gamepad.GamepadKeys
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
+import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.Gamepad
 import org.firstinspires.ftc.teamcode.library.functions.DashboardVar
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
+import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem
 import kotlin.math.absoluteValue
 
 @TeleOp(name="TeleOpCore (Kotlin)")
@@ -24,7 +26,9 @@ class TeleOpCore: OpMode() {
     private var defaultCarouselSpeed by DashboardVar(-0.25, "defaultCarouselSpeed", this::class)
 
     private var depositServoIn by DashboardVar(0.6, "depositServoIn", this::class)
-    private var depositServoOut by DashboardVar(0.32, "depositServoOut", this::class)
+    private var depositServoOut by DashboardVar(0.28, "depositServoOut", this::class)
+
+    private var depositLiftPowerAuto by DashboardVar(0.5, "depositLiftPowerAuto", this::class) { it.absoluteValue <= 1.0}
 
     override fun init() {
         robot = ExtThinBot(hardwareMap)
@@ -76,7 +80,18 @@ class TeleOpCore: OpMode() {
 
         // Control deposit lift
         val depositLiftPower = if (gamepad2.right_bumper) gamepad2.right_stick_y.toDouble() else 0.0
-        robot.fullIntakeSystem.depositLiftManual(depositLiftPower)
+        if (robot.depositLiftMotor.mode == DcMotor.RunMode.RUN_TO_POSITION) {
+            if (gamepad2.right_stick_y.absoluteValue > 0) robot.depositLiftMotor.power = 0.0
+            else if (!gamepad2.right_bumper) {
+                when {
+                    gamepad2.dpad_down -> robot.fullIntakeSystem.depositLiftAuto(FullIntakeSystem.DepositPosition.LOW, depositLiftPowerAuto)
+                    gamepad2.dpad_right -> robot.fullIntakeSystem.depositLiftAuto(FullIntakeSystem.DepositPosition.MIDDLE, depositLiftPowerAuto)
+                    gamepad2.dpad_up -> robot.fullIntakeSystem.depositLiftAuto(FullIntakeSystem.DepositPosition.HIGH, depositLiftPowerAuto)
+                }
+            }
+        } else
+            robot.fullIntakeSystem.depositLiftManual(depositLiftPower)
+
         if (gamepad2.y) robot.fullIntakeSystem.resetDepositZero()
 
         // Adjust drivetrain speed
