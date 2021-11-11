@@ -82,16 +82,17 @@ class TeleOpCore: OpMode() {
         val depositLiftPower = if (gamepad2.right_bumper) gamepad2.right_stick_y.toDouble() else 0.0
         if (robot.depositLiftMotor.mode == DcMotor.RunMode.RUN_TO_POSITION) {
             if (gamepad2.right_stick_y.absoluteValue > 0) robot.depositLiftMotor.power = 0.0
-            else if (!gamepad2.right_bumper) {
-                when {
-                    gamepad2.dpad_down -> robot.fullIntakeSystem.depositLiftAuto(FullIntakeSystem.DepositPosition.LOW, depositLiftPowerAuto)
-                    gamepad2.dpad_right -> robot.fullIntakeSystem.depositLiftAuto(FullIntakeSystem.DepositPosition.MIDDLE, depositLiftPowerAuto)
-                    gamepad2.dpad_up -> robot.fullIntakeSystem.depositLiftAuto(FullIntakeSystem.DepositPosition.HIGH, depositLiftPowerAuto)
-                }
-            }
-        } else
+        } else {
             robot.fullIntakeSystem.depositLiftManual(depositLiftPower)
+        }
 
+        if (!gamepad2.right_bumper) {
+            when {
+                gamepad2.dpad_down -> robot.fullIntakeSystem.depositLiftAuto(FullIntakeSystem.DepositPosition.LOW, depositLiftPowerAuto)
+                gamepad2.dpad_right -> robot.fullIntakeSystem.depositLiftAuto(FullIntakeSystem.DepositPosition.MIDDLE, depositLiftPowerAuto)
+                gamepad2.dpad_up -> robot.fullIntakeSystem.depositLiftAuto(FullIntakeSystem.DepositPosition.HIGH, depositLiftPowerAuto)
+            }
+        }
         if (gamepad2.y) robot.fullIntakeSystem.resetDepositZero()
 
         // Adjust drivetrain speed
@@ -123,6 +124,7 @@ class TeleOpCore: OpMode() {
         telemetry.addLine()
         telemetry.addData("Deposit lift power", depositLiftPower)
         telemetry.addData("Deposit lift position", robot.depositLiftMotor.currentPosition)
+        telemetry.addData("Deposit lift mode", robot.depositLiftMotor.mode)
         telemetry.addData("Combined intake motor power", dualIntakeMotorPower)
     }
 }

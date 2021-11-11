@@ -32,7 +32,7 @@ class CarouselVisionAutonomous : BaseAutonomous<ExtThinBot>() {
         VARIABLES: Menu Options
      */
     private var allianceColor: AllianceColor by config.custom("Alliance Color", RED, BLUE)
-    private var depositPosition: DepositPosition by config.custom("Deposit Position", LOW, MIDDLE, HIGH)
+    private var depositPosition: DepositPosition = HIGH
 
     override fun runOpMode() {
         robot = ExtThinBot(hardwareMap)
@@ -59,13 +59,13 @@ class CarouselVisionAutonomous : BaseAutonomous<ExtThinBot>() {
 
             robot.holonomicRR.poseEstimate = Pose2d(
                     -36.0,
-                    (-63.0).reverseIf(allianceColor == BLUE),
-                    (Math.PI / 2).reverseIf(allianceColor == BLUE) //startingHeading
+                    (-63.0) reverseIf(BLUE),
+                    (Math.PI / 2) reverseIf(BLUE) //startingHeading
             )
 
             builder()
-                    .strafeTo(Vector2d(-14.5, (-46.9).reverseIf(allianceColor == BLUE)))
-                    .splineToConstantHeading(Vector2d(-12.5, (-43.1).reverseIf(allianceColor == BLUE)), (Math.PI / 2).reverseIf(allianceColor == BLUE))
+                    .strafeTo(Vector2d(-14.5, (-46.9) reverseIf(BLUE)))
+                    .splineToConstantHeading(Vector2d(-12.5, (-43.1) reverseIf(BLUE)), (Math.PI / 2) reverseIf(BLUE))
                     .buildAndRun()
 
             //Drop Off Pre-Load
@@ -73,16 +73,16 @@ class CarouselVisionAutonomous : BaseAutonomous<ExtThinBot>() {
             robot.depositServo.position = 0.32
 
             builder()
-                    .strafeTo(Vector2d(-63.0, (-53.0).reverseIf(allianceColor == BLUE)))
+                    .strafeTo(Vector2d(-63.0, (-53.0) reverseIf(BLUE)))
                     .buildAndRun()
 
             //Turn Carousel
-            robot.carouselMotor.velocity = (0.5).reverseIf(allianceColor == BLUE)
+            robot.carouselMotor.velocity = (0.5) reverseIf(BLUE)
             sleep(1000)
             robot.carouselMotor.velocity = 0.0
 
             builder()
-                    .strafeTo(Vector2d(-63.0, (-53.0).reverseIf(allianceColor == BLUE)))
+                    .strafeTo(Vector2d(-63.0, (-53.0) reverseIf(BLUE)))
                     .buildAndRun()
         }
     }
