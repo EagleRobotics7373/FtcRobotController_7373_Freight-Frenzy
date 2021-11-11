@@ -7,3 +7,7 @@ enum class AllianceColor {
 enum class AutonomousObjective {
     WAREHOUSE, CAROUSEL
 }
+
+enum class PostAllianceHubTask {
+    WAREHOUSE, CAROUSEL, NOTHING
+}

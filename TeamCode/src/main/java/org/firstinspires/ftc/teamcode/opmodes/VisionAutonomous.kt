@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.library.functions.*
 import org.firstinspires.ftc.teamcode.library.functions.AllianceColor.*
+import org.firstinspires.ftc.teamcode.library.functions.PostAllianceHubTask.*
 import org.firstinspires.ftc.teamcode.library.functions.ToggleButtonWatcher
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsThinBot.BASE_CONSTRAINTS
@@ -22,7 +23,7 @@ import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
 import org.firstinspires.ftc.teamcode.library.vision.freightfrenzy.ColorMarkerVisionPipeline
 
 @com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Vision Autonomous", group = "Main")
-class CarouselVisionAutonomous : BaseAutonomous<ExtThinBot>() {
+class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
 
     /*
         VARIABLES: Hardware and Control
@@ -32,6 +33,7 @@ class CarouselVisionAutonomous : BaseAutonomous<ExtThinBot>() {
         VARIABLES: Menu Options
      */
     private var allianceColor: AllianceColor by config.custom("Alliance Color", RED, BLUE)
+    private var postAllianceHubTask: PostAllianceHubTask by config.custom("Post Alliance Hub Task", NOTHING, WAREHOUSE, CAROUSEL)
     private var depositPosition: DepositPosition = HIGH
 
     override fun runOpMode() {
@@ -58,14 +60,13 @@ class CarouselVisionAutonomous : BaseAutonomous<ExtThinBot>() {
             } else HIGH
 
             robot.holonomicRR.poseEstimate = Pose2d(
-                    -36.0,
+                    -12.5,
                     (-63.0) reverseIf(BLUE),
                     (Math.PI / 2) reverseIf(BLUE) //startingHeading
             )
 
             builder()
-                    .strafeTo(Vector2d(-14.5, (-46.9) reverseIf(BLUE)))
-                    .splineToConstantHeading(Vector2d(-12.5, (-43.1) reverseIf(BLUE)), (Math.PI / 2) reverseIf(BLUE))
+                    .splineToConstantHeading(Vector2d(-12.5, -43.1 reverseIf BLUE), Math.PI/2 reverseIf BLUE)
                     .buildAndRun()
 
             //Drop Off Pre-Load
@@ -75,15 +76,35 @@ class CarouselVisionAutonomous : BaseAutonomous<ExtThinBot>() {
             builder()
                     .strafeTo(Vector2d(-63.0, (-53.0) reverseIf(BLUE)))
                     .buildAndRun()
+            when (postAllianceHubTask) {
+                NOTHING -> {}
+                CAROUSEL -> {
+                    builder()
+                            .strafeTo(Vector2d(-63.0, -53.0 reverseIf BLUE))
+                            .buildAndRun()
 
-            //Turn Carousel
-            robot.carouselMotor.velocity = (0.5) reverseIf(BLUE)
-            sleep(1000)
-            robot.carouselMotor.velocity = 0.0
+                    //Turn Carousel
+                    robot.carouselMotor.velocity = (0.5) reverseIf(BLUE)
+                    sleep(1000)
+                    robot.carouselMotor.velocity = 0.0
 
-            builder()
-                    .strafeTo(Vector2d(-63.0, (-53.0) reverseIf(BLUE)))
-                    .buildAndRun()
+                    builder()
+                            .splineToConstantHeading(
+                                    Vector2d(-62.0, -36.0 reverseIf BLUE),
+                                    Math.PI / 2 reverseIf BLUE
+                            )
+                            .buildAndRun()
+                }
+                WAREHOUSE -> {
+                    builder(0.0)
+                            .splineToConstantHeading(
+                                    Vector2d(12.0, -63.0 reverseIf BLUE),
+                                    0.0
+                            )
+                            .strafeTo(Vector2d(40.0, -63.0 reverseIf BLUE))
+                            .buildAndRun()
+                }
+            }
         }
     }
 
