@@ -43,19 +43,20 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
             val contourResult = cvContainer.pipeline.contourResult?.standardized
             if (contourResult != null) {
                 val center = (contourResult.max.x + contourResult.min.x) / 2
-                depositPosition =
-                        (if (center < 0.33) LOW
-                        else if (center < 0.66) MIDDLE
-                        else HIGH)
+                depositPosition = when {
+                    center < 0.33 -> LOW
+                    center < 0.66 -> MIDDLE
+                    else -> HIGH
+                }
             }
 
             robot.holonomicRR.poseEstimate = Pose2d(
                     -12.5,
-                    (-63.0) reverseIf(BLUE),
-                    (Math.PI / 2) reverseIf(BLUE) //startingHeading
+                    (-63.0) reverseIf BLUE ,
+                    -(Math.PI / 2) reverseIf BLUE //startingHeading
             )
 
-            builder()
+            builder(Math.PI/2 reverseIf BLUE)
                     .splineToConstantHeading(Vector2d(-12.5, -43.1 reverseIf BLUE), Math.PI/2 reverseIf BLUE)
                     .buildAndRun()
 
@@ -64,7 +65,7 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
             robot.depositServo.position = 0.32
 
             builder()
-                    .strafeTo(Vector2d(-63.0, (-53.0) reverseIf(BLUE)))
+                    .strafeTo(Vector2d(-63.0, (-53.0) reverseIf BLUE))
                     .buildAndRun()
             when (postAllianceHubTask) {
                 NOTHING -> {}
@@ -74,11 +75,11 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
                             .buildAndRun()
 
                     //Turn Carousel
-                    robot.carouselMotor.velocity = (0.5) reverseIf(BLUE)
+                    robot.carouselMotor.velocity = (0.5) reverseIf BLUE
                     sleep(1000)
                     robot.carouselMotor.velocity = 0.0
 
-                    builder()
+                    builder(Math.PI/2 reverseIf BLUE)
                             .splineToConstantHeading(
                                     Vector2d(-62.0, -36.0 reverseIf BLUE),
                                     Math.PI / 2 reverseIf BLUE
@@ -86,8 +87,8 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
                             .buildAndRun()
                 }
                 WAREHOUSE -> {
-                    builder(0.0)
-                            .splineToConstantHeading(
+                    builder(-Math.PI/2 reverseIf BLUE)
+                            .splineTo(
                                     Vector2d(12.0, -63.0 reverseIf BLUE),
                                     0.0
                             )
