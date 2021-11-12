@@ -61,8 +61,20 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
                     .buildAndRun()
 
             //Drop Off Pre-Load
-            robot.fullIntakeSystem.depositLiftAuto(depositPosition, 1.0)
-            robot.depositServo.position = 0.32
+                    when (depositPosition) {
+                        LOW -> {
+                            builder()
+                                    .strafeTo(Vector2d(-14.0, -43.1 reverseIf BLUE))
+                                    .buildAndRun()
+
+                            robot.fullIntakeSystem.depositLiftAuto(MIDDLE, 1.0)
+                            robot.depositServo.position = 0.32
+                        }
+                        else -> {
+                            robot.fullIntakeSystem.depositLiftAuto(depositPosition, 1.0)
+                            robot.depositServo.position = 0.32
+                        }
+                    }
 
             builder()
                     .strafeTo(Vector2d(-63.0, (-53.0) reverseIf BLUE))
