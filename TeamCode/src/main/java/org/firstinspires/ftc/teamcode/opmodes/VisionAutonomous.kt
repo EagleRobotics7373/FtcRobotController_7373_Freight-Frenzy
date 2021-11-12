@@ -5,7 +5,6 @@ import com.acmerobotics.roadrunner.geometry.Vector2d
 import org.firstinspires.ftc.teamcode.library.functions.*
 import org.firstinspires.ftc.teamcode.library.functions.AllianceColor.*
 import org.firstinspires.ftc.teamcode.library.functions.PostAllianceHubTask.*
-import org.firstinspires.ftc.teamcode.library.functions.ToggleButtonWatcher
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
 import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem.DepositLiftPosition
 import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem.DepositLiftPosition.*
@@ -23,7 +22,7 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
         VARIABLES: Menu Options
      */
     private var allianceColor: AllianceColor by config.custom("Alliance Color", RED, BLUE)
-    private var defaultDepositPosition: DepositLiftPosition = HIGH
+    private var depositPosition: DepositLiftPosition by config.custom("Default Deposit Position", LOW, MIDDLE, HIGH)
     private var postAllianceHubTask: PostAllianceHubTask by config.custom("Post Alliance Hub Task", NOTHING, WAREHOUSE, CAROUSEL)
 
     override fun runOpMode() {
@@ -42,12 +41,13 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
 
         while (opModeIsActive()) {
             val contourResult = cvContainer.pipeline.contourResult?.standardized
-            depositPosition = if (contourResult != null) {
+            if (contourResult != null) {
                 val center = (contourResult.max.x + contourResult.min.x) / 2
-                if (center < 0.33) LOW
-                else if (center < 0.66) MIDDLE
-                else HIGH
-            } else HIGH
+                depositPosition =
+                        (if (center < 0.33) LOW
+                        else if (center < 0.66) MIDDLE
+                        else HIGH)
+            }
 
             robot.holonomicRR.poseEstimate = Pose2d(
                     -12.5,
