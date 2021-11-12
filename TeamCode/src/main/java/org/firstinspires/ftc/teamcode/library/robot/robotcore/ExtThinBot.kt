@@ -14,8 +14,9 @@ class ExtThinBot(_hardwareMap: HardwareMap): BaseRobot(_hardwareMap) {
     @JvmField val carouselMotor : DcMotorEx = hwInit("carouselMotor")
     @JvmField val depositLiftMotor : DcMotorEx = hwInit("depositLiftMotor")
     @JvmField val depositServo : Servo = hwInit("depositServo")
+    @JvmField val webcamServo : Servo = hwInit("webcamServo")
 
-    @JvmField val fullIntakeSystem = FullIntakeSystem(depositLiftMotor, intakeMotor1, intakeMotor2)
+    @JvmField val fullIntakeSystem = FullIntakeSystem(depositLiftMotor, depositServo, intakeMotor1, intakeMotor2)
 
     val imuControllerC = IMUController(hardwareMap, id = 'C')
     override val holonomicRR: HolonomicRR = HolonomicRR(imuControllerC, frontLeftMotor, backLeftMotor, backRightMotor, frontRightMotor,

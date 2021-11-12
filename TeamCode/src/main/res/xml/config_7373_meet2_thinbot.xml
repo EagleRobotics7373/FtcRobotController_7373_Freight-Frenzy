@@ -20,6 +20,8 @@
             <Matrix12vMotor name="depositLiftMotor" port="0" />
             <Matrix12vMotor name="carouselMotor" port="1" />
 
+            <Servo name="webcamServo" port="0"/>
+
             <LynxEmbeddedIMU name="imuE" port="0" bus="0"/>
         </LynxModule>
     </LynxUsbDevice>

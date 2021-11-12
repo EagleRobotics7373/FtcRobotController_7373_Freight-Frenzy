@@ -1,24 +1,14 @@
 package org.firstinspires.ftc.teamcode.opmodes
 
-import com.acmerobotics.dashboard.FtcDashboard
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
 import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.geometry.Vector2d
-import com.acmerobotics.roadrunner.trajectory.Trajectory
-import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
-import com.qualcomm.robotcore.hardware.DcMotor
-import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.library.functions.*
 import org.firstinspires.ftc.teamcode.library.functions.AllianceColor.*
 import org.firstinspires.ftc.teamcode.library.functions.PostAllianceHubTask.*
 import org.firstinspires.ftc.teamcode.library.functions.ToggleButtonWatcher
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
-import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsThinBot.BASE_CONSTRAINTS
-import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem
-import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem.DepositPosition
-import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem.DepositPosition.*
-import org.firstinspires.ftc.teamcode.library.vision.base.OpenCvContainer
+import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem.DepositLiftPosition
+import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem.DepositLiftPosition.*
 import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
 import org.firstinspires.ftc.teamcode.library.vision.freightfrenzy.ColorMarkerVisionPipeline
 
@@ -33,8 +23,8 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
         VARIABLES: Menu Options
      */
     private var allianceColor: AllianceColor by config.custom("Alliance Color", RED, BLUE)
+    private var defaultDepositPosition: DepositLiftPosition = HIGH
     private var postAllianceHubTask: PostAllianceHubTask by config.custom("Post Alliance Hub Task", NOTHING, WAREHOUSE, CAROUSEL)
-    private var depositPosition: DepositPosition = HIGH
 
     override fun runOpMode() {
         robot = ExtThinBot(hardwareMap)
