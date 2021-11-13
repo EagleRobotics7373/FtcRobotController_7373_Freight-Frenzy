@@ -18,15 +18,15 @@ class TeleOpCore: OpMode() {
     lateinit var gamepad1Ex: GamepadEx
     lateinit var gamepad2Ex: GamepadEx
 
-    private var reverse by DashboardVar(false, "reverse", this::class)
-    private var speed by DashboardVar(1, "speed", this::class) {it in 1..3}
+    private var reverse = false/* by DashboardVar(false, "reverse", this::class)*/
+    private var speed = 1/*by DashboardVar(1, "speed", this::class) {it in 1..3}*/
 
-    private var defaultCarouselSpeed by DashboardVar(-0.25, "defaultCarouselSpeed", this::class)
-    private var maxCarouselSpeed by DashboardVar(0.6, "defaultCarouselSpeed", this::class) {it in 0.0..1.0}
+    private var defaultCarouselSpeed = -0.25/*by DashboardVar(-0.25, "defaultCarouselSpeed", this::class)*/
+    private var maxCarouselSpeed = 0.6/*by DashboardVar(0.6, "defaultCarouselSpeed", this::class) {it in 0.0..1.0}*/
 
-    private var depositLiftPowerAuto by DashboardVar(0.5, "depositLiftPowerAuto", this::class) { it.absoluteValue <= 1.0}
+    private var depositLiftPowerAuto = 0.5/*by DashboardVar(0.5, "depositLiftPowerAuto", this::class) { it.absoluteValue <= 1.0}*/
 
-    private var defaultWebcamPosition by DashboardVar(1.0, "defaultWebcamPosition", this::class) { it in 0.0..1.0 }
+    private var defaultWebcamPosition = 1.0/*by DashboardVar(1.0, "defaultWebcamPosition", this::class) { it in 0.0..1.0 }*/
 
     override fun init() {
         robot = ExtThinBot(hardwareMap)
