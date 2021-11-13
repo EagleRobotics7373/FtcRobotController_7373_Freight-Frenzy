@@ -24,6 +24,9 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
     private var allianceColor: AllianceColor by config.custom("Alliance Color", RED, BLUE)
     private var depositPosition: DepositLiftPosition by config.custom("Default Deposit Position", LOW, MIDDLE, HIGH)
     private var postAllianceHubTask: PostAllianceHubTask by config.custom("Post- Alliance Hub Task", NOTHING, WAREHOUSE, CAROUSEL)
+    private var extraDelayBeforeStart: Int by config.int("Delay Before First Action", 0, 0..20000 step 1000)
+    private var extraDelayAfterShippingHub: Int by config.int("Delay After Shipping Hub", 0, 0..20000 step 1000)
+    private var webcamScanningDuration: Int by config.int("Webcam Scanning Duration", 0, 0..5000 step 500)
 
     override fun runOpMode() {
         robot = ExtThinBot(hardwareMap)
@@ -35,28 +38,26 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
 
         super.operateMenu()
 
-        cvContainer.pipeline.tracking = true
-        cvContainer.pipeline.shouldKeepTracking = true
-
-        robot.holonomicRR.poseEstimate = Pose2d(
-                -12.5,
-                (-63.0) reverseIf BLUE ,
-                -(Math.PI / 2) reverseIf BLUE //startingHeading
-        )
-
         if (opModeIsActive()) {
+            cvContainer.pipeline.tracking = true
+            cvContainer.pipeline.shouldKeepTracking = true
+
+            robot.holonomicRR.poseEstimate = Pose2d(
+                    -12.5,
+                    (-63.0) reverseIf BLUE ,
+                    -(Math.PI / 2) reverseIf BLUE //startingHeading
+            )
+
             robot.fullIntakeSystem.resetDepositZero()
             robot.fullIntakeSystem.update()
 
+            robot.webcamServo.position = 0.10
+            sleep(webcamScanningDuration.toLong())
+
             val contourResult = cvContainer.pipeline.contourResult?.standardized
-            if (contourResult != null) {
-                val center = (contourResult.max.x + contourResult.min.x) / 2
-                depositPosition = when {
-                    center < 0.33 -> LOW
-                    center < 0.66 -> MIDDLE
-                    else -> HIGH
-                }
-            }
+            if (contourResult != null) depositPosition = angledContourResult(contourResult)
+
+            sleep(extraDelayBeforeStart.toLong())
 
             builder(Math.PI/2 reverseIf BLUE)
                     .splineToConstantHeading(Vector2d(
@@ -70,6 +71,8 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
             robot.fullIntakeSystem.depositServoIsExtended = true
             sleep(800)
             robot.fullIntakeSystem.depositServoIsExtended = false
+
+            sleep(extraDelayAfterShippingHub.toLong())
 
             when (postAllianceHubTask) {
                 NOTHING -> {
@@ -104,6 +107,15 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
                             .buildAndRun()
                 }
             }
+        }
+    }
+
+    private fun angledContourResult(contourResult: ColorMarkerVisionPipeline.ContourResult): DepositLiftPosition {
+        val center = (contourResult.max.x + contourResult.min.x) / 2
+        return when {
+            center < 0.33 -> LOW
+            center < 0.66 -> MIDDLE
+            else -> HIGH
         }
     }
 
