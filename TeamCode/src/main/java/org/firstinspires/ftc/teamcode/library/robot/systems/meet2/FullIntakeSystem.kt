@@ -21,6 +21,10 @@ class FullIntakeSystem(
     private var depositServoOut = 0.1/*by DashboardVar(0.2, "depositServoOut", this::class)*/
 
     var depositServoIsExtended: Boolean = false
+    set(newValue) {
+        field = newValue
+        update()
+    }
 
     // Run the intake motors at the desired power
     fun intakeManual(motor1Power: Double, motor2Power: Double) {
@@ -43,9 +47,9 @@ class FullIntakeSystem(
 
     // Automatically raise/lower the deposit lift motor to the desired position
     fun depositLiftAuto(height: DepositLiftPosition, power: Double) {
+        depositLiftMotor.targetPosition = height.ticks
         depositLiftMotor.mode = DcMotor.RunMode.RUN_TO_POSITION
         depositLiftMotor.power = power
-        depositLiftMotor.targetPosition = height.ticks
     }
 
     // Refresh deposit lift motor state
@@ -64,7 +68,7 @@ class FullIntakeSystem(
 
     // Check whether the deposit lift is actually lowered
     val depositLiftIsLowered: Boolean
-    get() = depositLiftMotor.currentPosition.absoluteValue < depositLiftIsLoweredCutoffTicks.absoluteValue
+    get() = depositLiftMotor.currentPosition > depositLiftIsLoweredCutoffTicks
 
     fun resetDepositZero() {
         depositLiftMotor.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER

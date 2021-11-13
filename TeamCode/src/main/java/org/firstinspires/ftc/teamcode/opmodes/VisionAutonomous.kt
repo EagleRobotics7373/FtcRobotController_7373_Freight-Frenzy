@@ -23,7 +23,7 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
      */
     private var allianceColor: AllianceColor by config.custom("Alliance Color", RED, BLUE)
     private var depositPosition: DepositLiftPosition by config.custom("Default Deposit Position", LOW, MIDDLE, HIGH)
-    private var postAllianceHubTask: PostAllianceHubTask by config.custom("Post Alliance Hub Task", NOTHING, WAREHOUSE, CAROUSEL)
+    private var postAllianceHubTask: PostAllianceHubTask by config.custom("Post- Alliance Hub Task", NOTHING, WAREHOUSE, CAROUSEL)
 
     override fun runOpMode() {
         robot = ExtThinBot(hardwareMap)
@@ -33,13 +33,21 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
                 ColorMarkerVisionPipeline())
         cvContainer.start()
 
-        waitForStart()
+        super.operateMenu()
 
         cvContainer.pipeline.tracking = true
         cvContainer.pipeline.shouldKeepTracking = true
-        super.operateMenu()
 
-        while (opModeIsActive()) {
+        robot.holonomicRR.poseEstimate = Pose2d(
+                -12.5,
+                (-63.0) reverseIf BLUE ,
+                -(Math.PI / 2) reverseIf BLUE //startingHeading
+        )
+
+        if (opModeIsActive()) {
+            robot.fullIntakeSystem.resetDepositZero()
+            robot.fullIntakeSystem.update()
+
             val contourResult = cvContainer.pipeline.contourResult?.standardized
             if (contourResult != null) {
                 val center = (contourResult.max.x + contourResult.min.x) / 2
@@ -50,45 +58,33 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
                 }
             }
 
-            robot.holonomicRR.poseEstimate = Pose2d(
-                    -12.5,
-                    (-63.0) reverseIf BLUE ,
-                    -(Math.PI / 2) reverseIf BLUE //startingHeading
-            )
-
             builder(Math.PI/2 reverseIf BLUE)
-                    .splineToConstantHeading(Vector2d(-12.5, -43.1 reverseIf BLUE), Math.PI/2 reverseIf BLUE)
+                    .splineToConstantHeading(Vector2d(
+                            -12.5,
+                            (if (depositPosition == LOW) -46.0 else -43.1) reverseIf BLUE), Math.PI/2 reverseIf BLUE)
                     .buildAndRun()
 
             //Drop Off Pre-Load
-                    when (depositPosition) {
-                        LOW -> {
-                            builder()
-                                    .strafeTo(Vector2d(-14.0, -43.1 reverseIf BLUE))
-                                    .buildAndRun()
+            robot.fullIntakeSystem.depositLiftAuto(depositPosition, 0.6)
+            forDurationMs(2000) { robot.fullIntakeSystem.update() }
+            robot.fullIntakeSystem.depositServoIsExtended = true
+            sleep(800)
+            robot.fullIntakeSystem.depositServoIsExtended = false
 
-                            robot.fullIntakeSystem.depositLiftAuto(MIDDLE, 1.0)
-                            robot.depositServo.position = 0.32
-                        }
-                        else -> {
-                            robot.fullIntakeSystem.depositLiftAuto(depositPosition, 1.0)
-                            robot.depositServo.position = 0.32
-                        }
-                    }
-
-            builder()
-                    .strafeTo(Vector2d(-63.0, (-53.0) reverseIf BLUE))
-                    .buildAndRun()
             when (postAllianceHubTask) {
-                NOTHING -> {}
+                NOTHING -> {
+                    builder()
+                            .forward(2.0)
+                            .buildAndRun()
+                }
                 CAROUSEL -> {
                     builder()
-                            .strafeTo(Vector2d(-63.0, -53.0 reverseIf BLUE))
+                            .strafeTo(Vector2d(-63.0, -53.5 reverseIf BLUE))
                             .buildAndRun()
 
                     //Turn Carousel
-                    robot.carouselMotor.velocity = (0.5) reverseIf BLUE
-                    sleep(1000)
+                    robot.carouselMotor.power = (0.3) reverseIf BLUE
+                    sleep(5000)
                     robot.carouselMotor.velocity = 0.0
 
                     builder(Math.PI/2 reverseIf BLUE)

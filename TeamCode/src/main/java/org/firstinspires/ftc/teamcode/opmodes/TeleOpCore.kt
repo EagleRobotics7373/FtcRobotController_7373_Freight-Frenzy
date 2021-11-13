@@ -79,7 +79,7 @@ class TeleOpCore: OpMode() {
         }
 
         // Control deposit lift
-        val depositLiftPower = if (gamepad2.right_bumper) gamepad2.right_stick_y.toDouble() else 0.0
+        val depositLiftPower = if (gamepad2.right_bumper) gamepad2.right_stick_y.toDouble()*0.5 else 0.0
         if (robot.depositLiftMotor.mode == DcMotor.RunMode.RUN_TO_POSITION) {
             if (gamepad2.right_stick_y.absoluteValue > 0) robot.fullIntakeSystem.depositLiftManual(0.0)
         } else {
