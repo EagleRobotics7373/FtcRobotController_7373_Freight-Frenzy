@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
 import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem
 import kotlin.math.absoluteValue
 import kotlin.math.max
+import kotlin.math.pow
 
 @TeleOp(name="TeleOpCore (Kotlin)")
 class TeleOpCore: OpMode() {
@@ -20,6 +21,8 @@ class TeleOpCore: OpMode() {
 
     private var reverse = false/* by DashboardVar(false, "reverse", this::class)*/
     private var speed = 1/*by DashboardVar(1, "speed", this::class) {it in 1..3}*/
+    private var speedMax = 5.0
+    private var cubicEnable = false
 
     private var defaultCarouselSpeed = -0.25/*by DashboardVar(-0.25, "defaultCarouselSpeed", this::class)*/
     private var maxCarouselSpeed = 0.6/*by DashboardVar(0.6, "defaultCarouselSpeed", this::class) {it in 0.0..1.0}*/
@@ -48,9 +51,9 @@ class TeleOpCore: OpMode() {
         // Control both intake motors
         val dualIntakeMotorPower = when {
             gamepad2.right_trigger > 0.05 -> -gamepad2.right_trigger.toDouble()
-            gamepad2.left_trigger > 0.05 -> gamepad2.left_trigger.toDouble()
+            gamepad2.left_trigger > 0.05 -> gamepad2.left_trigger.toDouble() * 0.5
             gamepad1.right_trigger > 0.05 -> -gamepad1.right_trigger.toDouble()
-            gamepad1.left_trigger > 0.05 -> gamepad1.left_trigger.toDouble()
+            gamepad1.left_trigger > 0.05 -> gamepad1.left_trigger.toDouble() * 0.5
             else -> 0.0
         }
         if (dualIntakeMotorPower.absoluteValue > 0)
@@ -100,20 +103,27 @@ class TeleOpCore: OpMode() {
 
         // Adjust drivetrain speed
         when {
-            gamepad1Ex.wasJustPressed(GamepadKeys.Button.DPAD_UP) -> if (speed < 3) speed++
+            gamepad1Ex.wasJustPressed(GamepadKeys.Button.DPAD_UP) -> if (speed < speedMax) speed++
             gamepad1Ex.wasJustPressed(GamepadKeys.Button.DPAD_DOWN) -> if (speed > 1) speed--
+            gamepad1Ex.wasJustPressed(GamepadKeys.Button.DPAD_LEFT) -> cubicEnable = !cubicEnable
         }
+
+//        when {
+//            gamepad1.dpad_down -> speed = 1
+//            gamepad1.dpad_right -> speed = 2
+//            gamepad1.dpad_up -> speed = 3
+//        }
 
         // Reverse drivetrain
         when {
-            gamepad1.a -> reverse = false
-            gamepad1.b -> reverse = true
+            gamepad1.a -> reverse = true
+            gamepad1.b -> reverse = false
             gamepad1Ex.wasJustPressed(GamepadKeys.Button.X) -> reverse = !reverse
         }
 
-        val vertical = -gamepad1.left_stick_y.toDouble() * speed/3 * if (reverse) 1 else -1
-        val horizontal = gamepad1.left_stick_x.toDouble() * speed/3 * if (reverse) 1 else -1
-        val pivot = gamepad1.right_stick_x.toDouble() * speed/3
+        val vertical = -gamepad1.left_stick_y.toDouble().pow(if (cubicEnable) 3 else 1) * (speed/speedMax) * (if (reverse) 1 else -1)
+        val horizontal = gamepad1.left_stick_x.toDouble().pow(if (cubicEnable) 3 else 1) * (speed/speedMax) * (if (reverse) 1 else -1)
+        val pivot = gamepad1.right_stick_x.toDouble().pow(if (cubicEnable) 3 else 1) * (speed/speedMax)
 
 
 //        robot.holonomic.runWithoutEncoderVectored(horizontal, vertical, pivot, 0);
@@ -122,6 +132,10 @@ class TeleOpCore: OpMode() {
         robot.frontLeftMotor.power = pivot + vertical + horizontal
         robot.backLeftMotor.power = pivot + vertical - horizontal
 
+        telemetry.addData("Drivetrain speed", speed)
+        telemetry.addData("Drivetrain speed adj", speed/3.0)
+        telemetry.addData("Cubic enable", cubicEnable)
+        telemetry.addLine()
         telemetry.addData("Carousel speed", defaultCarouselSpeed)
         telemetry.addData("Carousel side", if (defaultCarouselSpeed < 0) "BLUE" else "RED")
         telemetry.addLine()

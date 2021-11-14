@@ -30,8 +30,8 @@ class ParkingAutonomous : BaseAutonomous<ExtThinBot>() {
         //Mecanum Drive
 
         //Mecanum Drive
-        val vertical = powerY
-        val horizontal = powerX
+        val vertical = powerY * 0.01
+        val horizontal = powerX * 0.01
         val pivot = 0.0
 
 

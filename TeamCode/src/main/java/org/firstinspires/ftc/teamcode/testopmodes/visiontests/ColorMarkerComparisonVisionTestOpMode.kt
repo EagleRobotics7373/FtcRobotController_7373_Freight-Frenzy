@@ -9,11 +9,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.library.functions.DashboardVar
 import org.firstinspires.ftc.teamcode.library.functions.rangeClip
 import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
+import org.firstinspires.ftc.teamcode.library.vision.freightfrenzy.ColorMarkerComparisonVisionPipeline
 import org.firstinspires.ftc.teamcode.library.vision.freightfrenzy.ColorMarkerVisionConstants
 import org.firstinspires.ftc.teamcode.library.vision.freightfrenzy.ColorMarkerVisionPipeline
 
-@TeleOp(name="OpenCV: ColorMarkerVisionTest", group="Vision")
-class ColorMarkerVisionTestOpMode: LinearOpMode() {
+@TeleOp(name="OpenCV: ColorMarkerComparisonVisionTest", group="Vision")
+class ColorMarkerComparisonVisionTestOpMode: LinearOpMode() {
 
     var useStandardized = false
 
@@ -41,7 +42,7 @@ class ColorMarkerVisionTestOpMode: LinearOpMode() {
         val cvContainer = VisionFactory.createOpenCv(
             hardwareMap,
             "Webcam 1",
-            ColorMarkerVisionPipeline())
+            ColorMarkerComparisonVisionPipeline())
         cvContainer.start()
 
         waitForStart()
@@ -62,6 +63,7 @@ class ColorMarkerVisionTestOpMode: LinearOpMode() {
             if (contourResult == null) {
                 telemetry.addData("Detected", "No")
             } else {
+                telemetry.addData("Position", cvContainer.pipeline.positionResult)
                 telemetry.addData("Detected", "Yes")
                 telemetry.addData("Min", contourResult.min.toString())
                 telemetry.addData("Max", contourResult.min.toString())

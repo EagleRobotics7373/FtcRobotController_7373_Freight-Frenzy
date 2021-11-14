@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes
 
+import android.graphics.Color
 import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.geometry.Vector2d
 import org.firstinspires.ftc.teamcode.library.functions.*
@@ -9,7 +10,9 @@ import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
 import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem.DepositLiftPosition
 import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem.DepositLiftPosition.*
 import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
+import org.firstinspires.ftc.teamcode.library.vision.freightfrenzy.ColorMarkerVisionConstants
 import org.firstinspires.ftc.teamcode.library.vision.freightfrenzy.ColorMarkerVisionPipeline
+import java.lang.Math.PI
 
 @com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Vision Autonomous", group = "Main")
 class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
@@ -26,7 +29,7 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
     private var postAllianceHubTask: PostAllianceHubTask by config.custom("Post- Alliance Hub Task", NOTHING, WAREHOUSE, CAROUSEL)
     private var extraDelayBeforeStart: Int by config.int("Delay Before First Action", 0, 0..20000 step 1000)
     private var extraDelayAfterShippingHub: Int by config.int("Delay After Shipping Hub", 0, 0..20000 step 1000)
-    private var webcamScanningDuration: Int by config.int("Webcam Scanning Duration", 0, 0..5000 step 500)
+    private var webcamScanningDuration: Int by config.int("Webcam Scanning Duration", 2000, 0..5000 step 500)
 
     override fun runOpMode() {
         robot = ExtThinBot(hardwareMap)
@@ -35,6 +38,7 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
                 "Webcam 1",
                 ColorMarkerVisionPipeline())
         cvContainer.start()
+
 
         super.operateMenu()
 
@@ -51,11 +55,14 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
             robot.fullIntakeSystem.resetDepositZero()
             robot.fullIntakeSystem.update()
 
-            robot.webcamServo.position = 0.10
+            robot.webcamServo.position = 0.79
             sleep(webcamScanningDuration.toLong())
 
             val contourResult = cvContainer.pipeline.contourResult?.standardized
             if (contourResult != null) depositPosition = angledContourResult(contourResult)
+            telem.addData("Found Deposit?", contourResult != null)
+            telem.addData("Deposit Position", depositPosition)
+            telem.update()
 
             sleep(extraDelayBeforeStart.toLong())
 
@@ -81,13 +88,13 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
                             .buildAndRun()
                 }
                 CAROUSEL -> {
-                    builder()
-                            .strafeTo(Vector2d(-63.0, -53.5 reverseIf BLUE))
+                    builder(-PI/2 reverseIf BLUE)
+                            .splineToConstantHeading(Vector2d(-66.0, -56.5 reverseIf BLUE), PI)
                             .buildAndRun()
 
                     //Turn Carousel
-                    robot.carouselMotor.power = (0.3) reverseIf BLUE
-                    sleep(5000)
+                    robot.carouselMotor.power = (0.25) reverseIf BLUE
+                    sleep(6000)
                     robot.carouselMotor.velocity = 0.0
 
                     builder(Math.PI/2 reverseIf BLUE)
@@ -113,8 +120,8 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
     private fun angledContourResult(contourResult: ColorMarkerVisionPipeline.ContourResult): DepositLiftPosition {
         val center = (contourResult.max.x + contourResult.min.x) / 2
         return when {
-            center < 0.33 -> LOW
-            center < 0.66 -> MIDDLE
+            center < ColorMarkerVisionConstants.BOUNDARY_FIRST -> LOW
+            center < ColorMarkerVisionConstants.BOUNDARY_SECOND -> MIDDLE
             else -> HIGH
         }
     }

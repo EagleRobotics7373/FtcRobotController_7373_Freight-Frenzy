@@ -18,6 +18,7 @@ class ColorMarkerVisionPipeline() : ResolutionPipeline() {
     var contourResult: ContourResult? = null
 
     // The mat that we will analyze, alone with the channel number we need to extract from HSV
+    private var subMat: Mat = Mat()
     private var hlsMat: Mat = Mat()
     private var thresholdResult: Mat = Mat()
 
@@ -29,8 +30,10 @@ class ColorMarkerVisionPipeline() : ResolutionPipeline() {
             // Blur the image for greater contour recognition accuracy
             blur(input, input, Size(5.0, 10.0))
 
+            subMat = input.submat((CUTOFF_TOP * input.rows()).toInt(), (CUTOFF_BOTTOM * input.rows()).toInt(), 0, input.cols())
+
             // Convert our input, in RGB format, to HLS (hue, luminosity, saturation)
-            cvtColor(input, hlsMat, COLOR_RGB2HLS)
+            cvtColor(subMat, hlsMat, COLOR_RGB2HLS)
 
             // Threshold the HLS mat to only include objects within desired HLS range
             inRange(
