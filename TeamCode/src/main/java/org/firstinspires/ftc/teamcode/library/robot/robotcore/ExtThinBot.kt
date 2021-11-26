@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.library.robot.robotcore
 
 import com.qualcomm.robotcore.hardware.DcMotorEx
+import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.Servo
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.HolonomicRR
@@ -21,5 +22,9 @@ class ExtThinBot(_hardwareMap: HardwareMap): BaseRobot(_hardwareMap) {
     val imuControllerC = IMUController(hardwareMap, id = 'C')
     override val holonomicRR: HolonomicRR = HolonomicRR(imuControllerC, frontLeftMotor, backLeftMotor, backRightMotor, frontRightMotor,
                                     TwoWheelOdometryLocalizer(intakeMotor1, intakeMotor2, imuControllerC))
+
+    init {
+        intakeMotor2.direction = DcMotorSimple.Direction.REVERSE
+    }
 
 }

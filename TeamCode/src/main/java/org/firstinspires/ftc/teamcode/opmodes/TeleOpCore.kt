@@ -5,6 +5,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
+import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.library.functions.DashboardVar
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
 import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem
@@ -22,7 +23,9 @@ class TeleOpCore: OpMode() {
     private var reverse = false/* by DashboardVar(false, "reverse", this::class)*/
     private var speed = 1/*by DashboardVar(1, "speed", this::class) {it in 1..3}*/
     private var speedMax = 5.0
+    private var maxRpm = 435
     private var cubicEnable = false
+    private var lastTimeRead = 0.0
 
     private var defaultCarouselSpeed = -0.25/*by DashboardVar(-0.25, "defaultCarouselSpeed", this::class)*/
     private var maxCarouselSpeed = 0.6/*by DashboardVar(0.6, "defaultCarouselSpeed", this::class) {it in 0.0..1.0}*/
@@ -31,10 +34,15 @@ class TeleOpCore: OpMode() {
 
     private var defaultWebcamPosition = 1.0/*by DashboardVar(1.0, "defaultWebcamPosition", this::class) { it in 0.0..1.0 }*/
 
+    private lateinit var elapsedTime: ElapsedTime
+
     override fun init() {
         robot = ExtThinBot(hardwareMap)
+        robot.holonomic.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT)
+
         gamepad1Ex = GamepadEx(gamepad1)
         gamepad2Ex = GamepadEx(gamepad2)
+        elapsedTime = ElapsedTime()
     }
 
     override fun loop() {
@@ -132,8 +140,14 @@ class TeleOpCore: OpMode() {
         robot.frontLeftMotor.power = pivot + vertical + horizontal
         robot.backLeftMotor.power = pivot + vertical - horizontal
 
-        telemetry.addData("Drivetrain speed", speed)
-        telemetry.addData("Drivetrain speed adj", speed/3.0)
+        val currentTime = elapsedTime.milliseconds()
+        telemetry.addData("Time Δ (ms)", currentTime - lastTimeRead)
+        telemetry.addLine()
+        lastTimeRead = currentTime
+
+        telemetry.addData("Drivetrain speed", "$speed out of $speedMax")
+        telemetry.addData("Drivetrain speed adj", speed/speedMax)
+        telemetry.addData("Drivetrain max rpm", maxRpm * (speed/speedMax))
         telemetry.addData("Cubic enable", cubicEnable)
         telemetry.addLine()
         telemetry.addData("Carousel speed", defaultCarouselSpeed)
@@ -143,6 +157,15 @@ class TeleOpCore: OpMode() {
         telemetry.addData("Deposit lift position", robot.depositLiftMotor.currentPosition)
         telemetry.addData("Deposit lift mode", robot.depositLiftMotor.mode)
         telemetry.addData("Combined intake motor power", dualIntakeMotorPower)
+        telemetry.addLine()
+        telemetry.addData("Vertical", vertical)
+        telemetry.addData("Horizontal", horizontal)
+        telemetry.addData("Pivot", pivot)
+        telemetry.addLine()
+        telemetry.addData("frontRightMotor", robot.frontRightMotor.power)
+        telemetry.addData("backRightMotor", robot.backRightMotor.power)
+        telemetry.addData("frontLeftMotor", robot.frontLeftMotor.power)
+        telemetry.addData("backLeftMotor", robot.backLeftMotor.power)
         telemetry.addLine()
         telemetry.addData("gamepad2.right_trigger", gamepad2.right_trigger)
         telemetry.addData("gamepad2.left_trigger", gamepad2.left_trigger)

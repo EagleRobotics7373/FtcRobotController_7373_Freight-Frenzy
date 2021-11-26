@@ -69,4 +69,10 @@ public interface Holonomic extends Stoppable {
      * @param runMode the RunMode to be set
      */
     void setMotorsMode(DcMotor.RunMode runMode);
+
+    /**
+     * Sets zero power behavior for all drivetrain motors
+     * @param zeroPowerBehavior the DcMotor.ZeroPowerBehavior to be set
+     */
+    void setZeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior);
 }

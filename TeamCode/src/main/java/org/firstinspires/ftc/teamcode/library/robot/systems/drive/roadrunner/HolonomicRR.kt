@@ -467,4 +467,8 @@ constructor (
     }
 
     override fun motorsAreBusy(): Boolean = isBusy()
+
+    override fun setZeroPowerBehavior(zeroPowerBehavior: DcMotor.ZeroPowerBehavior?) {
+        holonomic.setZeroPowerBehavior(zeroPowerBehavior)
+    }
 }
