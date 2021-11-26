@@ -16,6 +16,8 @@ abstract class BaseAutonomous<T:BaseRobot>: LinearOpMode() {
     protected          val telem           : MultipleTelemetry = MultipleTelemetry(telemetry, FtcDashboard.getInstance().telemetry)
     protected lateinit var elapsedTime     : ElapsedTime
 
+    init { robot.holonomicRR?.doMotorConfigForAutonomous() }
+
     protected val config = OpModeConfig(telemetry)
 
     protected fun operateMenu() {

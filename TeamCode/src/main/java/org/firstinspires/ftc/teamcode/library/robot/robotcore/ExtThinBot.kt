@@ -24,7 +24,7 @@ class ExtThinBot(_hardwareMap: HardwareMap): BaseRobot(_hardwareMap) {
                                     TwoWheelOdometryLocalizer(intakeMotor1, intakeMotor2, imuControllerC))
 
     init {
-        intakeMotor2.direction = DcMotorSimple.Direction.REVERSE
+        intakeMotor1.direction = DcMotorSimple.Direction.REVERSE
     }
 
 }

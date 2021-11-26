@@ -102,8 +102,6 @@ constructor (
 
 //        Thread { while (!Thread.interrupted()) updatePoseEstimate() }.start()
 
-        doMotorConfig()
-
         super.localizer = localizer ?: MecanumLocalizer(this)
     }
 
@@ -120,7 +118,7 @@ constructor (
             else                    -> Pose2d()
         }
 
-    private fun doMotorConfig() {
+    public fun doMotorConfigForAutonomous() {
         motorsExt.forEach {
             it.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
             it.direction = DcMotorSimple.Direction.FORWARD
@@ -263,7 +261,7 @@ constructor (
      */
     @JvmOverloads fun followTrajectory(trajectory: Trajectory, waypointActions: List<Pair<Double, ()->Unit>> = emptyList()) {
 
-        doMotorConfig()
+        doMotorConfigForAutonomous()
 
         follower.followTrajectory(trajectory)
         lastReadTime = System.currentTimeMillis()
@@ -292,7 +290,7 @@ constructor (
      */
     fun turn(angle: Double) {
 
-        doMotorConfig()
+        doMotorConfigForAutonomous()
 
         val heading = poseEstimate.heading
 

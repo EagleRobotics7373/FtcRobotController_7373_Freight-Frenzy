@@ -49,7 +49,7 @@ public class HolonomicImpl implements Holonomic {
 
         motors = new DcMotorEx[]{frontLeftMotor, backLeftMotor, backRightMotor, frontRightMotor};
 
-        this.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        this.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         for (DcMotorEx motor : motors) { motor.setTargetPositionTolerance(TARGET_POSITION_TOLERANCE);}
     }
 
