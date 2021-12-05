@@ -41,6 +41,7 @@ import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.Rob
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.RobotConstantsAccessor.translationalYPID
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsThinBot.globalPoseEstimate
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.support.DashboardUtil
+import kotlin.math.absoluteValue
 
 
 class HolonomicRR
@@ -89,6 +90,9 @@ constructor (
 
     // The start time for a trajectory or turn movement
     private var movementStart = 0.0
+    private var movementStartPosition: Pose2d = poseEstimate
+    var safeModeLastTriggered: Long? = null
+        private set
 
     // List of waypoint actions for the given trajectory movement
     private var trajectoryWaypointActions = emptyList<Pair<Double, ()->Unit>>().toMutableList()
@@ -132,7 +136,8 @@ constructor (
     /**
      * Updates the current pose estimate and report to FtcDashboard
      */
-    fun update() {
+    @JvmOverloads
+    fun update(safeMode: Boolean = false) {
         val beforePoseUpdate = System.currentTimeMillis()
         updatePoseEstimate()
         val afterPoseUpdate = System.currentTimeMillis()
@@ -234,6 +239,17 @@ constructor (
                     mode = Mode.IDLE
                     setDriveSignal(DriveSignal())
                 }
+
+                if (safeMode) {
+//                    val currentPose = poseEstimate
+//                    val deltaX = (currentPose.x - movementStartPosition.x).absoluteValue
+//                    val deltaY = (currentPose.y - movementStartPosition.y).absoluteValue
+//                    System.out.println("HolonomicRR CLOCK ${clock.seconds() - movementStart} deltaX $deltaX deltaY $deltaY")
+                    if ((clock.seconds() - movementStart) > 0.5 && (lastError.x.absoluteValue + lastError.y.absoluteValue > 4.0)) {
+                        safeModeLastTriggered = System.currentTimeMillis()
+                        stop()
+                    }
+                }
             }
 
         }
@@ -269,6 +285,8 @@ constructor (
 //        driveSignalUpdateThread.start()
         mode = Mode.FOLLOW_TRAJECTORY
         movementStart = clock.seconds()
+        System.out.println("MOVEMENT START $movementStart")
+        movementStartPosition = poseEstimate
         trajectoryWaypointActions = waypointActions.sortedBy { it.first }.toMutableList()
     }
 
@@ -278,9 +296,9 @@ constructor (
      * @param trajectory The trajectory to follow
      * @param waypointActions List of actions to accomplish at a certain percentage (from 0.0 to 1.0) of movement completion
      */
-    @JvmOverloads fun followTrajectorySync(trajectory: Trajectory, waypointActions: List<Pair<Double, ()->Unit>> = emptyList()) {
-        followTrajectory(trajectory, waypointActions)
-        waitForIdle()
+    @JvmOverloads fun followTrajectorySync(trajectory: Trajectory, waypointActions: List<Pair<Double, ()->Unit>>? = null, safeMode: Boolean = false) {
+        followTrajectory(trajectory, waypointActions ?: emptyList())
+        waitForIdle(safeMode)
     }
 
     /**
@@ -320,9 +338,9 @@ constructor (
     /**
      * Wait until the robot mode is IDLE
      */
-    private fun waitForIdle() {
+    private fun waitForIdle(safeMode: Boolean = false) {
         while (!Thread.currentThread().isInterrupted && isBusy()) {
-            update()
+            update(safeMode)
         }
     }
 

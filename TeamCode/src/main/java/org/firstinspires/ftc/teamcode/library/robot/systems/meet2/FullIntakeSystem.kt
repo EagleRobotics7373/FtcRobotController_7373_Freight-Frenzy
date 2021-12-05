@@ -13,12 +13,12 @@ class FullIntakeSystem(
         private val intakeMotor2: DcMotorEx
 ) {
     // The height at which we can still consider the deposit box lowered, for intaking
-    private var depositLiftIsLoweredCutoffTicks =-100/*by DashboardVar(100, "depositLiftIsLoweredCutoffTicks", this::class)*/
+    private var depositLiftIsLoweredCutoffTicks = -100/*by DashboardVar(100, "depositLiftIsLoweredCutoffTicks", this::class)*/
 
     // Deposit servo positions
-    private var depositServoIn = 0.53/*by DashboardVar(0.58, "depositServoIn", this::class)*/
-    private var depositServoMid = 0.4/*by DashboardVar(0.4, "depositServoMid", this::class)*/
-    private var depositServoOut = 0.1/*by DashboardVar(0.2, "depositServoOut", this::class)*/
+    private var depositServoIn by DashboardVar(0.6, "depositServoIn", this::class)
+    private var depositServoMid by DashboardVar(0.45, "depositServoMid", this::class)
+    private var depositServoOut by DashboardVar(0.0, "depositServoOut", this::class)
 
     var depositServoIsExtended: Boolean = false
     set(newValue) {

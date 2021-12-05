@@ -8,10 +8,10 @@ import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints;
 @Config
 public class DriveConstantsThinBot {
     public static double WHEEL_RADIUS = 2;
-    public static double GEAR_RATIO = 0.5;
+    public static double GEAR_RATIO = 1;
     public static double TRACK_WIDTH = 14.0;
 
-    public static double MAX_RPM = 1150;
+    public static double MAX_RPM = 435;
     public static double TICKS_PER_REV = 145.6;
 
     public static double kV = /*0.0035 .00772*/  /* 1.0 / rpmToVelocity(getMaxRpm())*/ 0.006;
@@ -21,7 +21,7 @@ public class DriveConstantsThinBot {
     public static Pose2d globalPoseEstimate = null;
 
     public static boolean RUN_USING_ENCODER = true;
-    public static PIDCoefficients MOTOR_VELO_PID = new PIDCoefficients(40, 0, 20);
+    public static PIDCoefficients MOTOR_VELO_PID = new PIDCoefficients(30, 0, 5);
 
     public static DriveConstraints BASE_CONSTRAINTS =
             new DriveConstraints(

@@ -21,15 +21,15 @@ class TeleOpCore: OpMode() {
 
     private var reverse = false/* by DashboardVar(false, "reverse", this::class)*/
     private var speed = 1/*by DashboardVar(1, "speed", this::class) {it in 1..3}*/
-    private var speedMax = 7.0
+    private var speedMax: Double = 4.0
     private var maxRpm = 435
     private var cubicEnable = false
     private var fod = false
     private var zeroAngle = 0.0
     private var lastTimeRead = 0.0
 
-    private var defaultCarouselSpeed = -0.25/*by DashboardVar(-0.25, "defaultCarouselSpeed", this::class)*/
-    private var maxCarouselSpeed = 0.6/*by DashboardVar(0.6, "defaultCarouselSpeed", this::class) {it in 0.0..1.0}*/
+    private var defaultCarouselSpeed = -0.50/*by DashboardVar(-0.25, "defaultCarouselSpeed", this::class)*/
+    private var maxCarouselSpeed = 0.8/*by DashboardVar(0.6, "defaultCarouselSpeed", this::class) {it in 0.0..1.0}*/
 
     private var depositLiftPowerAuto = 0.5/*by DashboardVar(0.5, "depositLiftPowerAuto", this::class) { it.absoluteValue <= 1.0}*/
 

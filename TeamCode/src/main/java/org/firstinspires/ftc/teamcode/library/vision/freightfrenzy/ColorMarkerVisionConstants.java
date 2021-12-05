@@ -15,8 +15,8 @@ public class ColorMarkerVisionConstants {
     public static int CONTOUR_MAT_PRINTOUT_NUM = 2;
     public static double CONTOUR_DILATION_KSIZE = 2.0;
 
-    public static double BOUNDARY_FIRST = 0.51; // was 0.51
-    public static double BOUNDARY_SECOND = 0.70; // was 0.7
+    public static double BOUNDARY_FIRST = 0.30; // was 0.51
+    public static double BOUNDARY_SECOND = 0.51; // was 0.7
 
     public static double RED_HUE_LOW = 6;
     public static double RED_HUE_HIGH = 170;

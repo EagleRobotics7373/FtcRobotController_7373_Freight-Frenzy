@@ -133,6 +133,7 @@ public class DriveVelocityPIDTuner extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
 
         drive = providePresetRobot(hardwareMap).getHolonomicRR();
+        drive.doMotorConfigForAutonomous();
 
         addPidVariable();
 

@@ -33,6 +33,7 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
 
     override fun runOpMode() {
         robot = ExtThinBot(hardwareMap)
+        super.autonomousConfig()
         val cvContainer = VisionFactory.createOpenCv(
                 hardwareMap,
                 "Webcam 1",
@@ -70,7 +71,13 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
                     .splineToConstantHeading(Vector2d(
                             -12.5,
                             (if (depositPosition == LOW) -46.0 else -43.1) reverseIf BLUE), Math.PI/2 reverseIf BLUE)
-                    .buildAndRun()
+                    .buildAndRun(safeMode = true)
+            if (robot.holonomicRR.safeModeLastTriggered != null) {
+                telem.addLine("EMERGENCY STOP!!!")
+                telem.addLine("Failed to register robot movement")
+                telem.update()
+                return
+            }
 
             //Drop Off Pre-Load
             robot.fullIntakeSystem.depositLiftAuto(depositPosition, 0.6)
@@ -93,7 +100,7 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
                             .buildAndRun()
 
                     //Turn Carousel
-                    robot.carouselMotor.power = (0.25) reverseIf BLUE
+                    robot.carouselMotor.power = (0.45) reverseIf BLUE
                     sleep(6000)
                     robot.carouselMotor.velocity = 0.0
 
@@ -107,11 +114,12 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
                 WAREHOUSE -> {
                     builder(-Math.PI/2 reverseIf BLUE)
                             .splineTo(
-                                    Vector2d(12.0, -63.0 reverseIf BLUE),
+                                    Vector2d(8.0, -65.0 reverseIf BLUE),
                                     0.0
                             )
-                            .strafeTo(Vector2d(40.0, -63.0 reverseIf BLUE))
                             .buildAndRun()
+                    builder().strafeLeft(4.0 reverseIf RED).buildAndRun()
+                    builder().forward(30.0).buildAndRun()
                 }
             }
         }

@@ -16,7 +16,7 @@ abstract class BaseAutonomous<T:BaseRobot>: LinearOpMode() {
     protected          val telem           : MultipleTelemetry = MultipleTelemetry(telemetry, FtcDashboard.getInstance().telemetry)
     protected lateinit var elapsedTime     : ElapsedTime
 
-    init { robot.holonomicRR?.doMotorConfigForAutonomous() }
+    protected fun autonomousConfig() { robot.holonomicRR?.doMotorConfigForAutonomous() }
 
     protected val config = OpModeConfig(telemetry)
 
@@ -72,6 +72,7 @@ abstract class BaseAutonomous<T:BaseRobot>: LinearOpMode() {
     protected fun builder() = robot.holonomicRR!!.trajectoryBuilder()
     protected fun builder(tangent: Double) = robot.holonomicRR!!.trajectoryBuilder(tangent)
 
-    protected fun BaseTrajectoryBuilder<TrajectoryBuilder>.buildAndRun(vararg waypointActions: Pair<Double, ()->Unit>) =
-            robot.holonomicRR!!.followTrajectorySync(this.build(), waypointActions.toList())
+    protected fun BaseTrajectoryBuilder<TrajectoryBuilder>.buildAndRun(safeMode: Boolean = false, vararg waypointActions: Pair<Double, ()->Unit>) {
+        robot.holonomicRR!!.followTrajectorySync(this.build(), waypointActions.toList(), safeMode)
+    }
 }
