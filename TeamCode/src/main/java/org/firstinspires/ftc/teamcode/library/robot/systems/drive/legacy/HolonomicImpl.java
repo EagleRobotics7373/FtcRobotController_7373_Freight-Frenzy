@@ -48,16 +48,9 @@ public class HolonomicImpl implements Holonomic {
         this.backLeftMotor = backLeftMotor;
 
         motors = new DcMotorEx[]{frontLeftMotor, backLeftMotor, backRightMotor, frontRightMotor};
-//        motors[0] = frontLeftMotor;
-//        motors[1] = backLeftMotor;
-//        motors[2] = backRightMotor;
-//        motors[3] = frontRightMotor;
 
-        for (DcMotorEx motor : motors) {
-            motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            motor.setTargetPositionTolerance(TARGET_POSITION_TOLERANCE);
-//            motor.setDirection(DcMotorSimple.Direction.REVERSE);
-        }
+//        this.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        for (DcMotorEx motor : motors) { motor.setTargetPositionTolerance(TARGET_POSITION_TOLERANCE);}
     }
 
     /**
@@ -242,6 +235,10 @@ public class HolonomicImpl implements Holonomic {
     public void stop() {
         setMotorsMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         for (DcMotorEx motor : motors) motor.setPower(0.0);
+    }
 
+    @Override
+    public void setZeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior) {
+        for (DcMotorEx motor : motors) motor.setZeroPowerBehavior(zeroPowerBehavior);
     }
 }
