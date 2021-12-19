@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.util.ElapsedTime
+import org.firstinspires.ftc.teamcode.library.functions.DashboardVar
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
 import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem
 import kotlin.math.absoluteValue
@@ -19,8 +20,8 @@ class TeleOpCore: OpMode() {
     lateinit var gamepad1Ex: GamepadEx
     lateinit var gamepad2Ex: GamepadEx
 
-    private var reverse = false/* by DashboardVar(false, "reverse", this::class)*/
-    private var speed = 1/*by DashboardVar(1, "speed", this::class) {it in 1..3}*/
+    private var reverse by DashboardVar(false, "reverse", this::class)
+    private var speed by DashboardVar(1, "speed", this::class) {it in 1..3}
     private var speedMax: Double = 4.0
     private var maxRpm = 435
     private var cubicEnable = false
@@ -28,12 +29,12 @@ class TeleOpCore: OpMode() {
     private var zeroAngle = 0.0
     private var lastTimeRead = 0.0
 
-    private var defaultCarouselSpeed = -0.50/*by DashboardVar(-0.25, "defaultCarouselSpeed", this::class)*/
-    private var maxCarouselSpeed = 0.8/*by DashboardVar(0.6, "defaultCarouselSpeed", this::class) {it in 0.0..1.0}*/
+    private var defaultCarouselSpeed by DashboardVar(-0.50, "defaultCarouselSpeed", this::class)
+    private var maxCarouselSpeed by DashboardVar(0.6, "defaultCarouselSpeed", this::class) {it in 0.0..1.0}
 
-    private var depositLiftPowerAuto = 0.5/*by DashboardVar(0.5, "depositLiftPowerAuto", this::class) { it.absoluteValue <= 1.0}*/
+    private var depositLiftPowerAuto by DashboardVar(0.5, "depositLiftPowerAuto", this::class) { it.absoluteValue <= 1.0}
 
-    private var defaultWebcamPosition = 1.0/*by DashboardVar(1.0, "defaultWebcamPosition", this::class) { it in 0.0..1.0 }*/
+    private var defaultWebcamPosition by DashboardVar(1.0, "defaultWebcamPosition", this::class) { it in 0.0..1.0 }
 
     private lateinit var elapsedTime: ElapsedTime
 
