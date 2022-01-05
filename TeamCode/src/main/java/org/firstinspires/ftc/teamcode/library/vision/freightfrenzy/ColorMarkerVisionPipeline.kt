@@ -61,7 +61,7 @@ class ColorMarkerVisionPipeline() : ResolutionPipeline() {
                     element                             // iterations - more of these means more erosion
             )
 
-            val drawingMat = when(CONTOUR_MAT_PRINTOUT_NUM) {
+            val drawingMat = when(MAT_OUTPUT_NUM) {
                 0       -> input
                 1       -> hlsMat
                 else    -> thresholdResult

@@ -1,11 +1,8 @@
 package org.firstinspires.ftc.teamcode.library.vision.freightfrenzy
 
-import org.firstinspires.ftc.robotcore.external.navigation.Position
 import org.firstinspires.ftc.teamcode.library.functions.AllianceColor
-import org.firstinspires.ftc.teamcode.library.vision.base.ImageResolution
-import org.firstinspires.ftc.teamcode.library.vision.base.ResolutionPipeline
-import org.firstinspires.ftc.teamcode.library.vision.base.coerceIn
-import org.firstinspires.ftc.teamcode.library.vision.base.times
+import org.firstinspires.ftc.teamcode.library.functions.DashboardVar
+import org.firstinspires.ftc.teamcode.library.vision.base.*
 import org.firstinspires.ftc.teamcode.library.vision.freightfrenzy.ColorMarkerVisionConstants.*
 
 import org.opencv.core.*
@@ -17,9 +14,12 @@ import org.opencv.imgproc.Imgproc.*
 class ColorMarkerComparisonVisionPipeline() : ResolutionPipeline() {
 
     // Public variable allowing OpModes to access contour details
-    var contourResult: ContourResult? = null
+    var tseContourResult: ContourResult? = null; private set
+    var firstMarker: ContourResult? = null; private set
+    var secondMarker: ContourResult? = null; private set
+
     var positionResult: MarkerPosition? = null
-    var allianceColor: AllianceColor = AllianceColor.RED
+    var allianceColor: AllianceColor by DashboardVar(AllianceColor.RED, "Alliance Color", this::class)
 
     // The mat that we will analyze, alone with the channel number we need to extract from HSV
     private var hlsMat: Mat = Mat()
@@ -31,13 +31,29 @@ class ColorMarkerComparisonVisionPipeline() : ResolutionPipeline() {
     override fun processFrame(input: Mat): Mat {
         if (tracking) {
 
+            /*
+            Initial preparation
+             */
+
             // Blur the image for greater contour recognition accuracy
             blur(input, input, Size(5.0, 10.0))
 
             // Convert our input, in RGB format, to HLS (hue, luminosity, saturation)
             cvtColor(input, hlsMat, COLOR_RGB2HLS)
 
-            // Threshold the HLS mat to only include objects within desired HLS range
+            // Set the active mat to draw on
+            val drawingMat = when(MAT_OUTPUT_NUM) {
+                0       -> input
+                1       -> hlsMat
+                2       -> tseThresholdResult
+                else    -> markersThresholdResult
+            }
+
+            /*
+            TSE image manipulation
+             */
+
+            // Threshold the HLS mat for TSE (only include objects within desired HLS range)
             inRange(
                     hlsMat,                             // original mat
                     Scalar(                             // lower bound for threshold
@@ -50,85 +66,105 @@ class ColorMarkerComparisonVisionPipeline() : ResolutionPipeline() {
                             CONTOUR_SAT_UPPER_BOUND),
                     tseThresholdResult                     // resultant mat
             )
+            val tseElementType = Imgproc.CV_SHAPE_RECT;
+            val tseKernelSize = CONTOUR_DILATION_KSIZE;
+            val tseElement = getStructuringElement(
+                    tseElementType, Size(2 * tseKernelSize + 1, 2 * tseKernelSize + 1),
+                    Point(tseKernelSize, tseKernelSize)
+            )
+            dilate(
+                    tseThresholdResult,                    // original mat
+                    tseThresholdResult,                    // resultant mat - just overwrite the original
+                    tseElement                             // iterations - more of these means more erosion
+            )
 
+            // Get all possible TSE contours
+            val possibleTseContours = findAndDrawContours(tseThresholdResult, drawingMat, SHOW_CONTOUR_TSE)
+
+            // Filter and sort the list to get most likely TSE contour, set it to our instance variable contourResult
+            this.tseContourResult = possibleTseContours
+                    .filter { it.width > CONTOUR_ENTITY_MINWIDTH * resolution.scale && it.min.y < input.rows() * (0.70) }
+                    .maxByOrNull { it.area }
+            tseContourResult?.let { labelItem(it, "TSE CONTOUR", drawingMat) }
+
+            /*
+            Alliance color marker image manipulation
+             */
+
+            // Threshold the HLS mat for alliance color markers (only include objects within desired HLS range)
+            // Will produce a result for red or blue alliance color, based on preset
             when (allianceColor) {
                 AllianceColor.RED -> inRange(
                         hlsMat,                             // original mat
                         Scalar(                             // lower bound for threshold
-                                RED_HUE_LOW,
+                                COLOR_RED_HUE_LOW,
                                 COLOR_LUM_LOW,
-                                RED_SAT_LOW),
+                                COLOR_RED_SAT_LOW),
                         Scalar(                             // upper bound for threshold
-                                RED_HUE_HIGH,
+                                COLOR_RED_HUE_HIGH,
                                 COLOR_LUM_HIGH,
-                                CONTOUR_SAT_UPPER_BOUND),
+                                COLOR_RED_SAT_HIGH),
                         markersThresholdResult              // resultant mat
                 )
                 AllianceColor.BLUE -> inRange(
                         hlsMat,                             // original mat
                         Scalar(                             // lower bound for threshold
-                                CONTOUR_HUE_LOWER_BOUND,
-                                CONTOUR_LUM_LOWER_BOUND,
-                                CONTOUR_SAT_LOWER_BOUND),
+                                COLOR_BLUE_HUE_LOW,
+                                COLOR_LUM_LOW,
+                                COLOR_BLUE_SAT_LOW),
                         Scalar(                             // upper bound for threshold
-                                CONTOUR_HUE_UPPER_BOUND,
-                                CONTOUR_LUM_UPPER_BOUND,
-                                CONTOUR_SAT_UPPER_BOUND),
+                                COLOR_BLUE_HUE_HIGH,
+                                COLOR_LUM_HIGH,
+                                COLOR_BLUE_SAT_HIGH),
                         markersThresholdResult              // resultant mat
                 )
             }
-
-            val elementType = Imgproc.CV_SHAPE_RECT;
-            val kernelSize = CONTOUR_DILATION_KSIZE;
-            val element = getStructuringElement(
-                    elementType, Size(2 * kernelSize + 1, 2 * kernelSize + 1),
-                    Point(kernelSize, kernelSize)
+            val markerElementType = Imgproc.CV_SHAPE_RECT;
+            val markerKernelSize = COLOR_DILATION_KSIZE;
+            val markerElement = getStructuringElement(
+                    markerElementType, Size(2 * markerKernelSize + 1, 2 * markerKernelSize + 1),
+                    Point(markerKernelSize, markerKernelSize)
             )
             dilate(
-                    tseThresholdResult,                    // original mat
-                    tseThresholdResult,                    // resultant mat - just overwrite the original
-                    element                             // iterations - more of these means more erosion
+                    markersThresholdResult,                 // original mat
+                    markersThresholdResult,                 // resultant mat - just overwrite the original
+                    markerElement                           // iterations - more of these means more erosion
             )
 
-            val drawingMat = when(CONTOUR_MAT_PRINTOUT_NUM) {
-                0       -> input
-                1       -> hlsMat
-                2       -> tseThresholdResult
-                else    -> markersThresholdResult
-            }
+            // Get all possible marker contours
+            val possibleMarkerContours = findAndDrawContours(markersThresholdResult, drawingMat, SHOW_CONTOUR_MARKERS)
 
-            // TSE Contour
-            val contoursCmpltd = findContours(tseThresholdResult, drawingMat)
-            val resCntur = contoursCmpltd
-                .filter { it.width > CONTOUR_ENTITY_MINWIDTH * resolution.scale && it.min.y < input.rows() * (0.70) }
-                .maxByOrNull { it.area }
-            this.contourResult = resCntur
+            // Filter and sort the list to get most likely marker contours
+            val organizedMarkerContours = possibleMarkerContours
+                    .filter { it.width > COLOR_WIDTH_MIN * resolution.scale     // width greater than minimum
+                            && it.width < COLOR_WIDTH_MAX * resolution.scale    // width less than maximum
+                            && it.min.y < input.rows() * (0.70) }                       // y position in upper 70% of image
+                    .sortedBy { it.min.x }                                              // sort by x position (left to right)
 
-            // Marker contours
-            val markerContoursCmpltd = findContours(markersThresholdResult, drawingMat)
-            val resCnturs = markerContoursCmpltd
-                    .filter { it.width > CONTOUR_MARKER_MINWIDTH * resolution.scale
-                            && it.width < CONTOUR_MARKER_MAXWIDTH * resolution.scale
-                            && it.min.y < input.rows() * (0.70) }
-                    .sortedBy { it.min.x }
+            // Get the first two markers in the list, if available, and set them to our instance variables
+            this.firstMarker = organizedMarkerContours.getOrNull(0)
+            this.secondMarker = organizedMarkerContours.getOrNull(1)
 
-            positionResult = if (resCntur != null && resCnturs.size >= 2) {
-                val firstMarker = resCnturs[0]
-                val secondMarker = resCnturs[1]
+            firstMarker?.let { labelItem(it, "FIRST MARKER", drawingMat) }
+            secondMarker?.let { labelItem(it, "SECOND MARKER", drawingMat) }
+
+            /*
+            Determination based on what we found above
+             */
+            positionResult = if (tseContourResult != null && firstMarker != null && secondMarker != null) {
                 when {
-                    resCntur.min.x < firstMarker.min.x && resCntur.min.x < secondMarker.min.x -> MarkerPosition.LEFT
-                    firstMarker.min.x < resCntur.min.x && resCntur.min.x < secondMarker.min.x -> MarkerPosition.CENTER
+                    tseContourResult!!.min.x < firstMarker!!.min.x && tseContourResult!!.min.x < secondMarker!!.min.x -> MarkerPosition.LEFT
+                    firstMarker!!.min.x < tseContourResult!!.min.x && tseContourResult!!.min.x < secondMarker!!.min.x -> MarkerPosition.CENTER
                     else -> MarkerPosition.RIGHT
                 }
             } else null
 
-
-
-            addLabels(drawingMat)
+            // Label everything, then return the mat that we labeled
+            addGenericText(drawingMat)
             return drawingMat
         }
         else {
-            addLabels(input)
+            addGenericText(input)
             return input
         }
     }
@@ -159,7 +195,7 @@ class ColorMarkerComparisonVisionPipeline() : ResolutionPipeline() {
     }
 
 
-    private fun addLabels(mat: Mat) {
+    private fun addGenericText(mat: Mat) {
 
         // Place text representing the team name (at the top)
         val teamNameStartPoint = Point(5.0, 30.0)
@@ -184,7 +220,15 @@ class ColorMarkerComparisonVisionPipeline() : ResolutionPipeline() {
 //                Scalar(inverseColorAtPoint(mat, resultTextStartPoint)), 2)
     }
 
-    private fun findContours(mat: Mat, drawingMat: Mat): List<ColorMarkerComparisonVisionPipeline.ContourResult> {
+    private fun labelItem(contourResult: ContourResult, name: String, drawingMat: Mat) {
+        val textStartPoint = (contourResult.min - Point(1.0, 1.0)).coerceIn(drawingMat)
+        rectangle(drawingMat, contourResult.min, contourResult.max, Scalar(inverseColorAtPoint(drawingMat, contourResult.min)), 2)
+        putText(drawingMat, name, textStartPoint,
+                FONT_HERSHEY_SIMPLEX, 0.5 * resolution.scale,
+                Scalar(inverseColorAtPoint(drawingMat, textStartPoint)), 2)
+    }
+
+    private fun findAndDrawContours(mat: Mat, drawingMat: Mat, draw: Boolean = true): List<ColorMarkerComparisonVisionPipeline.ContourResult> {
         val contours = emptyList<MatOfPoint>().toMutableList()
         val hierarchy = Mat()
         findContours(
@@ -195,14 +239,8 @@ class ColorMarkerComparisonVisionPipeline() : ResolutionPipeline() {
                 CHAIN_APPROX_SIMPLE
         )
 
-        return contours.mapIndexed { index, matOfPoint ->
-            drawContours(
-                    drawingMat,
-                    contours,
-                    index,
-                    Scalar.all(150.0),
-                    5
-            )
+
+        return contours.mapIndexedNotNull { index, matOfPoint ->
 
             var minX = Int.MAX_VALUE
             var minY = Int.MAX_VALUE
@@ -215,11 +253,22 @@ class ColorMarkerComparisonVisionPipeline() : ResolutionPipeline() {
                 if (point.y > maxY) maxY = point.y.toInt()
             }
 
-            println("CONTOUR $index min=($minX, $minY) max=($maxX, $maxY)")
-
-            return@mapIndexed ContourResult(
+            val contourResult = ContourResult(
                     Point(minX.toDouble(), minY.toDouble()),
                     Point(maxX.toDouble(), maxY.toDouble()))
+
+            if (contourResult.width < 5) return@mapIndexedNotNull null
+
+            if (draw) drawContours(
+                    drawingMat,
+                    contours,
+                    index,
+                    Scalar.all(150.0),
+                    5
+            )
+            println("CONTOUR $index min=($minX, $minY) max=($maxX, $maxY)")
+
+            return@mapIndexedNotNull contourResult
         }
 
     }

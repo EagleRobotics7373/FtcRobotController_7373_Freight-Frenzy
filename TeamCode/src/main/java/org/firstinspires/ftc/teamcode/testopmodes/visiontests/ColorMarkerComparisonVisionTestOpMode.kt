@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.testopmodes.visiontests
 
 import com.acmerobotics.dashboard.FtcDashboard
-import com.acmerobotics.dashboard.config.ValueProvider
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
 import com.arcrobotics.ftclib.gamepad.GamepadEx
 import com.arcrobotics.ftclib.gamepad.GamepadKeys
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
@@ -11,31 +11,22 @@ import org.firstinspires.ftc.teamcode.library.functions.rangeClip
 import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
 import org.firstinspires.ftc.teamcode.library.vision.freightfrenzy.ColorMarkerComparisonVisionPipeline
 import org.firstinspires.ftc.teamcode.library.vision.freightfrenzy.ColorMarkerVisionConstants
-import org.firstinspires.ftc.teamcode.library.vision.freightfrenzy.ColorMarkerVisionPipeline
 
 @TeleOp(name="OpenCV: ColorMarkerComparisonVisionTest", group="Vision")
 class ColorMarkerComparisonVisionTestOpMode: LinearOpMode() {
 
-    var useStandardized = false
+    init {
+        Thread.sleep(100)
+        this.telemetry = MultipleTelemetry(telemetry, FtcDashboard.getInstance().telemetry)
+    }
+
+    var useStandardized by DashboardVar(false, "useStandardized", this::class)
+    var webcamServoPosition by DashboardVar(0.76, "webcamPosition", this::class)
 
     override fun runOpMode() {
 
-        FtcDashboard.getInstance().addConfigVariable(
-            this::class.simpleName,
-            "Standardized?",
-            object: ValueProvider<Boolean> {
-                override fun get(): Boolean = useStandardized
-
-                override fun set(value: Boolean?) {
-                    if (value != null) {
-                        useStandardized = value
-                    }
-                }
-            },
-        true)
-
         val webcamServo = hardwareMap.servo.get("webcamServo")
-        var webcamServoPosition = 0.76
+        val voltageSensor = hardwareMap.voltageSensor.first()
 
         val gamepad1Ex = GamepadEx(gamepad1)
 
@@ -53,7 +44,7 @@ class ColorMarkerComparisonVisionTestOpMode: LinearOpMode() {
         while (opModeIsActive()) {
             gamepad1Ex.readButtons()
 
-            val contourResult = cvContainer.pipeline.contourResult?.let {
+            val contourResult = cvContainer.pipeline.tseContourResult?.let {
                 if (useStandardized) it.standardized else it
             }
 
@@ -97,6 +88,8 @@ class ColorMarkerComparisonVisionTestOpMode: LinearOpMode() {
             webcamServoPosition = webcamServoPosition.rangeClip(0.0, 1.0)
             webcamServo.position = webcamServoPosition
             telemetry.addData("Webcam Servo Position", webcamServoPosition)
+
+            if (voltageSensor != null) telemetry.addData("Voltage", voltageSensor.voltage)
 
             telemetry.update()
         }
