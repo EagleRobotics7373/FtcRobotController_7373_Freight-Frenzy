@@ -11,3 +11,11 @@ enum class AutonomousObjective {
 enum class PostAllianceHubTask {
     WAREHOUSE, CAROUSEL, NOTHING
 }
+
+enum class StartingPosition {
+    NEAR_CAROUSEL, CENTER, NEAR_WAREHOUSE
+}
+
+enum class CameraPosition {
+    LEFT, CENTER, RIGHT
+}
