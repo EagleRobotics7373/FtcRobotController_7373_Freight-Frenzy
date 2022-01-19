@@ -7,16 +7,18 @@ class OdometryLiftSystem(
         private val odometryServoCenter: Servo
 ) {
 
-    private val raisePos: Double = 0.0
-    private val lowerPos: Double = 0.0
+    private val raisePosCenter: Double = 0.35
+    private val lowerPosCenter: Double = 1.0
+    private val raisePosLeft: Double = 0.2
+    private val lowerPosLeft: Double = 0.5
 
     fun raise() {
-        odometryServoCenter.position = raisePos
-        odometryServoLeft.position = raisePos
+        odometryServoCenter.position = raisePosCenter
+        odometryServoLeft.position = raisePosLeft
     }
 
     fun lower() {
-        odometryServoCenter.position = lowerPos
-        odometryServoLeft.position = lowerPos
+        odometryServoCenter.position = lowerPosCenter
+        odometryServoLeft.position = lowerPosLeft
     }
 }

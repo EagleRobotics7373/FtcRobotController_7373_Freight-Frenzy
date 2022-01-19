@@ -47,6 +47,7 @@ class TeleOpCore: OpMode() {
         robot = ExtThinBot(hardwareMap)
         robot.holonomic.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE)
         robot.carouselMotor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        robot.odometryLift.raise()
 
         gamepad1Ex = GamepadEx(gamepad1)
         gamepad2Ex = GamepadEx(gamepad2)

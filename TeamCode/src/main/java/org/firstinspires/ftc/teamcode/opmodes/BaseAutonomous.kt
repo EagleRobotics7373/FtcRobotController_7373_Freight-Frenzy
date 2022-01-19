@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.library.functions.ToggleButtonWatcher
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.BaseRobot
+import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
 
 abstract class BaseAutonomous<T:BaseRobot>: LinearOpMode() {
 
@@ -16,7 +17,10 @@ abstract class BaseAutonomous<T:BaseRobot>: LinearOpMode() {
     protected          val telem           : MultipleTelemetry = MultipleTelemetry(telemetry, FtcDashboard.getInstance().telemetry)
     protected lateinit var elapsedTime     : ElapsedTime
 
-    protected fun autonomousConfig() { robot.holonomicRR?.doMotorConfigForAutonomous() }
+    protected fun autonomousConfig() {
+        robot.holonomicRR?.doMotorConfigForAutonomous()
+        robot.let { it as? ExtThinBot }?.odometryLift?.lower()
+    }
 
     protected val config = OpModeConfig(telemetry)
 

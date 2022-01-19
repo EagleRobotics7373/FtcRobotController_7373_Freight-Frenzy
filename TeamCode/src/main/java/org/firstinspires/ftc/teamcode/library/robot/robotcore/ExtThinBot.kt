@@ -23,7 +23,7 @@ class ExtThinBot(_hardwareMap: HardwareMap): BaseRobot(_hardwareMap) {
 
     @JvmField val fullIntakeSystem = FullIntakeSystem(depositLiftMotor, depositServo, intakeMotor1, intakeMotor2)
 
-    val imuControllerC = IMUController(hardwareMap, id = 'C')
+    @JvmField val imuControllerC = IMUController(hardwareMap, id = 'C')
     override val holonomicRR: HolonomicRR = HolonomicRR(imuControllerC, frontLeftMotor, backLeftMotor, backRightMotor, frontRightMotor,
                                     TwoWheelOdometryLocalizer(intakeMotor1, intakeMotor2, imuControllerC))
 
