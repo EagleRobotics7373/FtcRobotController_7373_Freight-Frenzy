@@ -8,11 +8,12 @@
 
             <Matrix12vMotor name="intakeMotor1" port="0" />     // odometry (side)
             <Matrix12vMotor name="intakeMotor2" port="1" />     // odometry (center)
-            <Servo name="odometryServoLeft" port="0"/>
+
             <Servo name="odometryServoCenter" port="1"/>
 
-            <Servo name="tseGrabberPivotServo" port="2"/>
+                <Servo name="tseGrabberPivotServo" port="2"/>
             <Servo name="tseGrabberServo" port="3"/>
+            <Servo name="webcamServo" port="4"/>
 
             <LynxEmbeddedIMU name="imuC" port="0" bus="0"/>
 
@@ -25,7 +26,7 @@
             <Matrix12vMotor name="depositLiftMotor" port="3" />
             <Matrix12vMotor name="carouselMotor" port="2" />
 
-            <Servo name="webcamServo" port="2"/>
+            <Servo name="odometryServoLeft" port="0"/>
 
             <LynxEmbeddedIMU name="imuE" port="0" bus="0"/>
         </LynxModule>
