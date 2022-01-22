@@ -9,7 +9,7 @@ enum class AutonomousObjective {
 }
 
 enum class PostAllianceHubTask {
-    WAREHOUSE, CAROUSEL, NOTHING
+    WAREHOUSE, CAROUSEL, NOTHING, BACKPEDAL
 }
 
 enum class StartingPosition {

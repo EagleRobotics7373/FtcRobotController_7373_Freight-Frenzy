@@ -25,7 +25,7 @@ class ExtThinBot(_hardwareMap: HardwareMap): BaseRobot(_hardwareMap) {
 
     @JvmField val imuControllerC = IMUController(hardwareMap, id = 'C')
     override val holonomicRR: HolonomicRR = HolonomicRR(imuControllerC, frontLeftMotor, backLeftMotor, backRightMotor, frontRightMotor,
-                                    TwoWheelOdometryLocalizer(intakeMotor1, intakeMotor2, imuControllerC))
+                                    TwoWheelOdometryLocalizer(carouselMotor, intakeMotor1, imuControllerC))
 
     init {
         intakeMotor1.direction = DcMotorSimple.Direction.REVERSE

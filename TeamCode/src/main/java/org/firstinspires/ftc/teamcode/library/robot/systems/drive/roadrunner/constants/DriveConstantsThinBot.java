@@ -12,7 +12,7 @@ public class DriveConstantsThinBot {
     public static double TRACK_WIDTH = 14.0;
 
     public static double MAX_RPM = 435;
-    public static double TICKS_PER_REV = 145.6;
+    public static double TICKS_PER_REV = 384.5;
 
     public static double kV = /*0.0035 .00772*/  /* 1.0 / rpmToVelocity(getMaxRpm())*/ 0.006;
     public static double kA = 0.0;

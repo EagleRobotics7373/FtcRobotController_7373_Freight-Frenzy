@@ -20,7 +20,7 @@ public class ColorMarkerVisionConstants {
 
     public static double COLOR_RED_HUE_LOW = 0;
     public static double COLOR_RED_HUE_HIGH = 6;
-    public static double COLOR_RED_SAT_LOW = 140;
+    public static double COLOR_RED_SAT_LOW = 90;
     public static double COLOR_RED_SAT_HIGH = 245;
     public static double COLOR_BLUE_HUE_LOW = 110;
     public static double COLOR_BLUE_HUE_HIGH = 130;
@@ -28,9 +28,12 @@ public class ColorMarkerVisionConstants {
     public static double COLOR_BLUE_SAT_HIGH = 220;
     public static double COLOR_LUM_LOW = 10;
     public static double COLOR_LUM_HIGH = 255;
-    public static int COLOR_WIDTH_MIN = 25;
-    public static int COLOR_WIDTH_MAX = 80;
+    public static int COLOR_WIDTH_MIN = 60;
+    public static int COLOR_WIDTH_MAX = 140;
     public static double COLOR_DILATION_KSIZE = 15.0;
+
+    public static double MARKER_CUTOFF_LOWER = 0.3;
+    public static double MARKER_CUTOFF_UPPER = 0.7;
 
     public static boolean SHOW_CONTOUR_MARKERS = true;
     public static boolean SHOW_CONTOUR_TSE = true;

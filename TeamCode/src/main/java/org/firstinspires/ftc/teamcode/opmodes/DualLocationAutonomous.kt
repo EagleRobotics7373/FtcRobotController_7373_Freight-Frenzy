@@ -39,7 +39,7 @@ class DualLocationAutonomous : BaseAutonomous<ExtThinBot>() {
 //        cvContainer.pipeline.tracking = true
         robot.carouselMotor.mode = DcMotor.RunMode.RUN_USING_ENCODER
 
-        super.operateMenu()
+        super.operateMenu(null)
 
         when (autonomousObjective) {
             WAREHOUSE -> {

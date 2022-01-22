@@ -7,7 +7,9 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.library.functions.DashboardVar
+import org.firstinspires.ftc.teamcode.library.functions.StartingPosition
 import org.firstinspires.ftc.teamcode.library.functions.rangeClip
+import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem
 import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
 import org.firstinspires.ftc.teamcode.library.vision.freightfrenzy.ColorMarkerComparisonVisionPipeline
 import org.firstinspires.ftc.teamcode.library.vision.freightfrenzy.ColorMarkerVisionConstants
@@ -22,6 +24,7 @@ class ColorMarkerComparisonVisionTestOpMode: LinearOpMode() {
 
     var useStandardized by DashboardVar(false, "useStandardized", this::class)
     var webcamServoPosition by DashboardVar(0.76, "webcamPosition", this::class)
+    var startingPositionCenter by DashboardVar(false, "startingPositionCenter", this::class)
 
     override fun runOpMode() {
 
@@ -47,7 +50,20 @@ class ColorMarkerComparisonVisionTestOpMode: LinearOpMode() {
             val contourResult = cvContainer.pipeline.tseContourResult?.let {
                 if (useStandardized) it.standardized else it
             }
-
+            val firstMarker = cvContainer.pipeline.firstMarker
+            val depositPosition = when (startingPositionCenter) {
+                true -> { // we are looking diagonally at right stack
+                    if (contourResult == null) FullIntakeSystem.DepositLiftPosition.HIGH // right
+                    else if (firstMarker != null && contourResult.min.x < firstMarker.min.x) FullIntakeSystem.DepositLiftPosition.LOW
+                    else FullIntakeSystem.DepositLiftPosition.MIDDLE
+                }
+                else -> { // we are looking straight on at the stack
+                    if (contourResult == null) FullIntakeSystem.DepositLiftPosition.LOW // left
+                    else if (firstMarker != null && contourResult.min.x < firstMarker.min.x) FullIntakeSystem.DepositLiftPosition.MIDDLE
+                    else FullIntakeSystem.DepositLiftPosition.HIGH
+                }
+            }
+            telemetry.addData("Deposit Position", depositPosition)
             telemetry.addData("Standardized", useStandardized)
             telemetry.addLine()
 

@@ -24,7 +24,7 @@ abstract class BaseAutonomous<T:BaseRobot>: LinearOpMode() {
 
     protected val config = OpModeConfig(telemetry)
 
-    protected fun operateMenu() {
+    protected fun operateMenu(and: (()->Unit)? = null) {
 
         val dpadUpWatch = ToggleButtonWatcher {gamepad1.dpad_up}
         val dpadDownWatch = ToggleButtonWatcher {gamepad1.dpad_down}
@@ -41,6 +41,7 @@ abstract class BaseAutonomous<T:BaseRobot>: LinearOpMode() {
                 dpadRightWatch.invoke() -> config.update(iterFw   = true)
             }
 
+            and?.invoke()
         }
     }
 

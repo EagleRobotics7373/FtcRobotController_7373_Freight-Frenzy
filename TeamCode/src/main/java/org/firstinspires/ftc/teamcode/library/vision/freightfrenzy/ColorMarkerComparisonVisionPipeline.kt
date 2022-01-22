@@ -138,7 +138,8 @@ class ColorMarkerComparisonVisionPipeline() : ResolutionPipeline() {
             val organizedMarkerContours = possibleMarkerContours
                     .filter { it.width > COLOR_WIDTH_MIN * resolution.scale     // width greater than minimum
                             && it.width < COLOR_WIDTH_MAX * resolution.scale    // width less than maximum
-                            && it.min.y < input.rows() * (0.70) }                       // y position in upper 70% of image
+                            && it.min.y < input.rows() * (MARKER_CUTOFF_UPPER)
+                            && it.min.y > input.rows() * (MARKER_CUTOFF_LOWER)}        // y position in upper 70% of image
                     .sortedBy { it.min.x }                                              // sort by x position (left to right)
 
             // Get the first two markers in the list, if available, and set them to our instance variables
@@ -221,7 +222,7 @@ class ColorMarkerComparisonVisionPipeline() : ResolutionPipeline() {
     }
 
     private fun labelItem(contourResult: ContourResult, name: String, drawingMat: Mat) {
-        val textStartPoint = (contourResult.min - Point(1.0, 1.0)).coerceIn(drawingMat)
+        val textStartPoint = (contourResult.min).coerceIn(drawingMat)
         rectangle(drawingMat, contourResult.min, contourResult.max, Scalar(inverseColorAtPoint(drawingMat, contourResult.min)), 2)
         putText(drawingMat, name, textStartPoint,
                 FONT_HERSHEY_SIMPLEX, 0.5 * resolution.scale,

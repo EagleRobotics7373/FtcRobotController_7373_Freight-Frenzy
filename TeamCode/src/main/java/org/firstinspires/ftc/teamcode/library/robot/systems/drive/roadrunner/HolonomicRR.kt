@@ -97,6 +97,8 @@ constructor (
     // List of waypoint actions for the given trajectory movement
     private var trajectoryWaypointActions = emptyList<Pair<Double, ()->Unit>>().toMutableList()
 
+    var safeModeErrorThreshold = 10
+
     init {
         dashboard.telemetryTransmissionInterval = 25
         turnController.setInputBounds(0.0, 2.0 * Math.PI)
@@ -245,7 +247,7 @@ constructor (
 //                    val deltaX = (currentPose.x - movementStartPosition.x).absoluteValue
 //                    val deltaY = (currentPose.y - movementStartPosition.y).absoluteValue
 //                    System.out.println("HolonomicRR CLOCK ${clock.seconds() - movementStart} deltaX $deltaX deltaY $deltaY")
-                    if ((clock.seconds() - movementStart) > 0.5 && (lastError.x.absoluteValue + lastError.y.absoluteValue > 4.0)) {
+                    if ((clock.seconds() - movementStart) > 0.5 && (lastError.x.absoluteValue + lastError.y.absoluteValue > this.safeModeErrorThreshold)) {
                         safeModeLastTriggered = System.currentTimeMillis()
                         stop()
                     }

@@ -25,7 +25,7 @@ class ParkingAutonomous : BaseAutonomous<ExtThinBot>() {
 //        cvContainer.pipeline.tracking = true
         robot.carouselMotor.mode = DcMotor.RunMode.RUN_USING_ENCODER
 
-        super.operateMenu()
+        super.operateMenu(null)
 
         //Mecanum Drive
 

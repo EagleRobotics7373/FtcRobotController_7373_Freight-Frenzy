@@ -16,9 +16,9 @@ class FullIntakeSystem(
     private var depositLiftIsLoweredCutoffTicks = -100/*by DashboardVar(100, "depositLiftIsLoweredCutoffTicks", this::class)*/
 
     // Deposit servo positions
-    private var depositServoIn by DashboardVar(0.6, "depositServoIn", this::class)
-    private var depositServoMid by DashboardVar(0.45, "depositServoMid", this::class)
-    private var depositServoOut by DashboardVar(0.0, "depositServoOut", this::class)
+    private var depositServoIn by DashboardVar(0.8, "depositServoIn", this::class)
+    private var depositServoMid by DashboardVar(0.7, "depositServoMid", this::class)
+    private var depositServoOut by DashboardVar(0.2, "depositServoOut", this::class)
 
     var depositServoIsExtended: Boolean = false
     set(newValue) {
@@ -76,8 +76,8 @@ class FullIntakeSystem(
 
     enum class DepositLiftPosition(val ticks: Int) {
         LOW(0),
-        MIDDLE(-400),
-        HIGH(-900),
+        MIDDLE(-540),
+        HIGH(-1220),
         TSE(0);
     }
 }

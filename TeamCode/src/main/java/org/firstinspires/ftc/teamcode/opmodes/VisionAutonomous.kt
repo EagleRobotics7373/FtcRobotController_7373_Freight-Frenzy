@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
 import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem.DepositLiftPosition
 import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem.DepositLiftPosition.*
 import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
+import org.firstinspires.ftc.teamcode.library.vision.freightfrenzy.ColorMarkerComparisonVisionPipeline
 import org.firstinspires.ftc.teamcode.library.vision.freightfrenzy.ColorMarkerVisionConstants
 import org.firstinspires.ftc.teamcode.library.vision.freightfrenzy.ColorMarkerVisionPipeline
 import java.lang.Math.PI
@@ -28,25 +29,27 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
     private var allianceColor: AllianceColor by config.custom("Alliance Color", RED, BLUE)
     private var startingPosition: StartingPosition by config.custom("Starting Position", NEAR_CAROUSEL, CENTER, NEAR_WAREHOUSE)
     private var depositPosition: DepositLiftPosition by config.custom("Default Deposit Position", LOW, MIDDLE, HIGH)
-    private var postAllianceHubTask: PostAllianceHubTask by config.custom("Post- Alliance Hub Task", NOTHING, WAREHOUSE, CAROUSEL)
+    private var postAllianceHubTask: PostAllianceHubTask by config.custom("Post- Alliance Hub Task", BACKPEDAL, WAREHOUSE, CAROUSEL, NOTHING)
     private var extraDelayBeforeStart: Int by config.int("Delay Before First Action", 0, 0..20000 step 1000)
     private var extraDelayAfterShippingHub: Int by config.int("Delay After Shipping Hub", 0, 0..20000 step 1000)
     private var webcamScanningDuration: Int by config.int("Webcam Scanning Duration", 2000, 0..5000 step 500)
-    private var cameraPosition: CameraPosition by config.custom("Camera Position", CameraPosition.LEFT, CameraPosition.CENTER, CameraPosition.RIGHT)
+    private var safeModeErrorThreshold: Int by config.int("Safe Mode Error Threshold", 10, 0..30 step 2)
 
     override fun runOpMode() {
         robot = ExtThinBot(hardwareMap)
+        robot.webcamServo.position = 0.1
         super.autonomousConfig()
+        robot.holonomicRR.safeModeErrorThreshold = safeModeErrorThreshold
         val cvContainer = VisionFactory.createOpenCv(
                 hardwareMap,
                 "Webcam 1",
-                ColorMarkerVisionPipeline())
+                ColorMarkerComparisonVisionPipeline())
         cvContainer.start()
 
-
-        super.operateMenu()
+        operateMenu { setWebcamServoPosition() }
 
         if (opModeIsActive()) {
+            cvContainer.pipeline.allianceColor = allianceColor
             cvContainer.pipeline.tracking = true
             cvContainer.pipeline.shouldKeepTracking = true
 
@@ -63,17 +66,27 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
             robot.fullIntakeSystem.resetDepositZero()
             robot.fullIntakeSystem.update()
 
-            robot.webcamServo.position = when (cameraPosition) {
-                CameraPosition.LEFT -> 0.78
-                CameraPosition.CENTER -> 0.79
-                CameraPosition.RIGHT -> 0.8
-            }
+            setWebcamServoPosition()
             sleep(webcamScanningDuration.toLong())
 
-            val contourResult = cvContainer.pipeline.contourResult?.standardized
-            if (contourResult != null) depositPosition = angledContourResult(contourResult)
-            telem.addData("Found Deposit?", contourResult != null)
-            telem.addData("Deposit Position", depositPosition)
+//            val contourResult = cvContainer.pipeline.contourResult?.standardized
+//            if (contourResult != null) depositPosition = angledContourResult(contourResult)
+//            telem.addData("Found Deposit?", contourResult != null)
+            val contourResult = cvContainer.pipeline.tseContourResult
+            val firstMarker = cvContainer.pipeline.firstMarker
+            depositPosition = when (startingPosition) {
+                CENTER -> { // we are looking diagonally at right stack
+                    if (contourResult == null) HIGH // left
+                    else if (firstMarker != null && contourResult.min.x < firstMarker.min.x) LOW
+                    else MIDDLE
+                }
+                else -> { // we are looking straight on at the stack
+                    if (contourResult == null) LOW // left
+                    else if (firstMarker != null && contourResult.min.x < firstMarker.min.x) MIDDLE
+                    else HIGH
+                }
+            }
+            telem.addData("Deposit Position for ${cvContainer.pipeline.allianceColor} Alliance", depositPosition)
             telem.update()
 
             sleep(extraDelayBeforeStart.toLong())
@@ -81,7 +94,7 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
             builder(Math.PI/2 reverseIf BLUE)
                     .splineToConstantHeading(Vector2d(
                             -12.5,
-                            (if (depositPosition == LOW) -46.0 else -43.1) reverseIf BLUE), Math.PI/2 reverseIf BLUE)
+                            (if (depositPosition == LOW) -45.5 else -44.0) reverseIf BLUE), Math.PI/2 reverseIf BLUE)
                     .buildAndRun(safeMode = true)
             if (robot.holonomicRR.safeModeLastTriggered != null) {
                 telem.addLine("EMERGENCY STOP!!!")
@@ -92,13 +105,13 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
 
             //Drop Off Pre-Load
             robot.fullIntakeSystem.depositLiftAuto(depositPosition, 0.6)
-            forDurationMs(2000) { robot.fullIntakeSystem.update() }
+            if (depositPosition != LOW) forDurationMs(2000) { robot.fullIntakeSystem.update() }
             robot.fullIntakeSystem.depositServoIsExtended = true
-            sleep(800)
+            sleep(1500)
             robot.fullIntakeSystem.depositServoIsExtended = false
 
             sleep(extraDelayAfterShippingHub.toLong())
-
+            robot.fullIntakeSystem.depositLiftAuto(LOW, 0.6)
             when (postAllianceHubTask) {
                 NOTHING -> {
                     builder()
@@ -132,6 +145,11 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
                     builder().strafeLeft(4.0 reverseIf RED).buildAndRun()
                     builder().forward(30.0).buildAndRun()
                 }
+                BACKPEDAL -> {
+                    builder()
+                            .strafeTo(Vector2d(robot.holonomicRR.poseEstimate.x, -63.0 reverseIf BLUE))
+                            .buildAndRun()
+                }
             }
         }
     }
@@ -142,6 +160,13 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
             center < ColorMarkerVisionConstants.BOUNDARY_FIRST -> LOW
             center < ColorMarkerVisionConstants.BOUNDARY_SECOND -> MIDDLE
             else -> HIGH
+        }
+    }
+
+    private fun setWebcamServoPosition() {
+        robot.webcamServo.position = when (startingPosition) {
+            CENTER -> 0.45
+            else -> 0.55
         }
     }
 

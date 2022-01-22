@@ -20,7 +20,7 @@ class TeleOpCore: OpMode() {
     lateinit var gamepad2Ex: GamepadEx
 
     private var reverse = false/* by DashboardVar(false, "reverse", this::class)*/
-    private var speed = 1/*by DashboardVar(1, "speed", this::class) {it in 1..3}*/
+    private var speed = 3/*by DashboardVar(1, "speed", this::class) {it in 1..3}*/
     private var speedMax: Double = 4.0
     private var maxRpm = 435
     private var cubicEnable = false
@@ -33,7 +33,7 @@ class TeleOpCore: OpMode() {
 
     private var depositLiftPowerAuto = 0.5/*by DashboardVar(0.5, "depositLiftPowerAuto", this::class) { it.absoluteValue <= 1.0}*/
 
-    private var defaultWebcamPosition = 1.0/*by DashboardVar(1.0, "defaultWebcamPosition", this::class) { it in 0.0..1.0 }*/
+    private var defaultWebcamPosition = 0.1/*by DashboardVar(1.0, "defaultWebcamPosition", this::class) { it in 0.0..1.0 }*/
 
     private lateinit var elapsedTime: ElapsedTime
 
@@ -120,6 +120,13 @@ class TeleOpCore: OpMode() {
                     robot.fullIntakeSystem.depositLiftAuto(FullIntakeSystem.DepositLiftPosition.MIDDLE, depositLiftPowerAuto)
                 !gamepad2CanControlExtras && gamepad2.dpad_up || gamepad1CanControlAccessories && gamepad1.dpad_up ->
                     robot.fullIntakeSystem.depositLiftAuto(FullIntakeSystem.DepositLiftPosition.HIGH, depositLiftPowerAuto)
+            }
+        }
+
+        if (gamepad2CanControlExtras) {
+            when {
+                gamepad2Ex.wasJustPressed(A) -> robot.tseGrabber.nextState()
+                gamepad2Ex.wasJustPressed(B) -> robot.tseGrabber.prevState()
             }
         }
 

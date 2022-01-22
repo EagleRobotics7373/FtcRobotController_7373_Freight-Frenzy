@@ -12,19 +12,18 @@ constructor (private val pivotServo : Servo,
     Enum class defining positions for the arm to pivot
      */
     enum class PivotPosition(val position: Double) {
-        GRAB(0.02),
-        OVER_WALL(0.24),
-        VERTICAL(0.48),
-        YEET(0.68),
+        GRAB(0.12),
+        RELEASE(0.35),
+        STORAGE(0.87),
     }
 
     /**
     Enum class defining positions for the grabber to pivot
      */
     enum class GrabPosition(val position: Double) {
-        GRAB(0.01),
+        GRAB(0.07),
         MID_GRAB(0.33),
-        STORAGE(0.69)
+        STORAGE(0.14)
     }
 
     /**
@@ -55,7 +54,7 @@ constructor (private val pivotServo : Servo,
     {
 
         STORAGE(
-                action = { it, _ -> it.pivot(PivotPosition.YEET); it.grab(GrabPosition.STORAGE) },
+                action = { it, _ -> it.pivot(PivotPosition.STORAGE); it.grab(GrabPosition.STORAGE) },
                 prev = { RELEASE },
                 next = { GRAB_PREP }),
         GRAB_PREP(
@@ -67,11 +66,11 @@ constructor (private val pivotServo : Servo,
                 prev = { GRAB_PREP },
                 next = { IN_AIR }),
         IN_AIR(
-                action = { it, _ -> it.pivot(PivotPosition.VERTICAL); it.grab(GrabPosition.GRAB) },
+                action = { it, _ -> it.pivot(PivotPosition.RELEASE); it.grab(GrabPosition.GRAB) },
                 prev = { GRAB },
                 next = { RELEASE }),
         RELEASE(
-                action = { it, time -> it.pivot(PivotPosition.OVER_WALL); it.grab(if (time > 0) GrabPosition.MID_GRAB else GrabPosition.GRAB) },
+                action = { it, time -> it.pivot(PivotPosition.RELEASE); it.grab(if (time > 0) GrabPosition.MID_GRAB else GrabPosition.GRAB) },
                 prev = { IN_AIR },
                 next = { STORAGE  }),
         CUSTOM(
