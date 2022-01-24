@@ -13,7 +13,8 @@ constructor (private val pivotServo : Servo,
      */
     enum class PivotPosition(val position: Double) {
         GRAB(0.12),
-        RELEASE(0.35),
+        RELEASE(0.38),
+        RELEASE_HIGHER(0.45),
         STORAGE(0.87),
     }
 
@@ -22,7 +23,7 @@ constructor (private val pivotServo : Servo,
      */
     enum class GrabPosition(val position: Double) {
         GRAB(0.07),
-        MID_GRAB(0.33),
+        MID_GRAB(0.40),
         STORAGE(0.14)
     }
 
@@ -70,7 +71,7 @@ constructor (private val pivotServo : Servo,
                 prev = { GRAB },
                 next = { RELEASE }),
         RELEASE(
-                action = { it, time -> it.pivot(PivotPosition.RELEASE); it.grab(if (time > 0) GrabPosition.MID_GRAB else GrabPosition.GRAB) },
+                action = { it, _ -> it.pivot(PivotPosition.RELEASE); it.grab(GrabPosition.MID_GRAB) },
                 prev = { IN_AIR },
                 next = { STORAGE  }),
         CUSTOM(

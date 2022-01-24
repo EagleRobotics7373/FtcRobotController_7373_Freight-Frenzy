@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
+import org.firstinspires.ftc.teamcode.library.robot.systems.lt.TseGrabber
 import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem
 import kotlin.math.absoluteValue
 import kotlin.math.pow
@@ -61,8 +62,8 @@ class TeleOpCore: OpMode() {
 
         // Control deposit servo
         when {
-            gamepad2.a || gamepad1CanControlAccessories && gamepad1.a -> robot.fullIntakeSystem.depositServoIsExtended = true
-            gamepad2.b || gamepad1CanControlAccessories && gamepad1.b -> robot.fullIntakeSystem.depositServoIsExtended = false
+            (gamepad2.a/* && !gamepad2CanControlExtras*/) || gamepad1CanControlAccessories && gamepad1.a -> robot.fullIntakeSystem.depositServoIsExtended = true
+            (gamepad2.b/* && !gamepad2CanControlExtras*/) || gamepad1CanControlAccessories && gamepad1.b -> robot.fullIntakeSystem.depositServoIsExtended = false
         }
 
         // Control both intake motors
@@ -108,7 +109,10 @@ class TeleOpCore: OpMode() {
         val depositLiftPower = if (gamepad2CanControlExtras) gamepad2.right_stick_y.toDouble()*0.5 else 0.0
         if (robot.depositLiftMotor.mode == DcMotor.RunMode.RUN_TO_POSITION) {
             if (gamepad2.right_stick_y.absoluteValue > 0) robot.fullIntakeSystem.depositLiftManual(0.0)
-        } else {
+        } else if (gamepad2.x && !gamepad2CanControlExtras) {
+            robot.fullIntakeSystem.depositLiftManual(-0.10)
+        }
+        else {
             robot.fullIntakeSystem.depositLiftManual(depositLiftPower)
         }
 
@@ -123,14 +127,16 @@ class TeleOpCore: OpMode() {
             }
         }
 
+        // TSE Grabber
         if (gamepad2CanControlExtras) {
             when {
-                gamepad2Ex.wasJustPressed(A) -> robot.tseGrabber.nextState()
-                gamepad2Ex.wasJustPressed(B) -> robot.tseGrabber.prevState()
+//                gamepad2Ex.wasJustPressed(A) -> robot.tseGrabber.nextState()
+//                gamepad2Ex.wasJustPressed(B) -> robot.tseGrabber.prevState()
+                gamepad2Ex.wasJustPressed(Y) -> robot.tseGrabber.move(pivot = TseGrabber.PivotPosition.RELEASE_HIGHER)
             }
         }
 
-        if (gamepad2.y || gamepad1CanControlAccessories && gamepad1.y) robot.fullIntakeSystem.resetDepositZero()
+        if ((gamepad2.y && !gamepad2CanControlExtras) || gamepad1CanControlAccessories && gamepad1.y) robot.fullIntakeSystem.resetDepositZero()
 
         // Control webcam servo
         robot.webcamServo.position = defaultWebcamPosition

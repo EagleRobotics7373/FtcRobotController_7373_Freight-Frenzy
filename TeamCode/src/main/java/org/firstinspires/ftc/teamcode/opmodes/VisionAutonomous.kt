@@ -46,7 +46,11 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
                 ColorMarkerComparisonVisionPipeline())
         cvContainer.start()
 
-        operateMenu { setWebcamServoPosition() }
+        operateMenu {
+            setWebcamServoPosition()
+            if (gamepad2.x) robot.fullIntakeSystem.depositLiftManual(-0.10)
+            if (gamepad2.y) robot.fullIntakeSystem.resetDepositZero()
+        }
 
         if (opModeIsActive()) {
             cvContainer.pipeline.allianceColor = allianceColor
