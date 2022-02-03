@@ -4,6 +4,8 @@ import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
+
+import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import org.firstinspires.ftc.teamcode.library.functions.AllianceColor
 import org.firstinspires.ftc.teamcode.library.functions.DashboardVar
@@ -14,17 +16,22 @@ class CarouselAccelerationTest: OpMode() {
     lateinit var carouselMotor: DcMotorEx
 
     private var motionStart: Double = Double.NEGATIVE_INFINITY
-    private var accelStart: Double by DashboardVar(1.0, "accelStart", this::class) { it >= 0.0 }
-    private var accelDuration1: Double by DashboardVar(1.0, "accelDuration1", this::class) { it > 0.0 }
+
+    private var accelStart: Double by DashboardVar(0.01, "accelStart", this::class) { it >= 0.0 }
+    private var accelDuration1: Double by DashboardVar(0.25, "accelDuration1", this::class) { it > 0.0 }
     private var accelDelayDuration: Double by DashboardVar(0.0, "accelDelayDuration", this::class) { it >= 0.0 }
-    private var accelDuration2: Double by DashboardVar(1.0, "accelDuration2", this::class) { it > 0.0 }
+    private var accelDuration2: Double by DashboardVar(0.75, "accelDuration2", this::class) { it > 0.0 }
     private var constDuration: Double by DashboardVar(1.0, "constDuration", this::class) { it > 0.0 }
 
     private var initialSpeed: Double by DashboardVar(0.5, "initialSpeed", this::class) { it > 0.0 }
     private var intermediateSpeed: Double by DashboardVar(0.9, "intermediateSpeed", this::class) { it > 0.0 }
     private var finalSpeed: Double by DashboardVar(1.0, "finalSpeed", this::class) { it > 0.0 }
 
-    private var allianceColor: AllianceColor by DashboardVar(AllianceColor.BLUE, "allianceColor", this::class)
+
+    private var velocityConstant: Double by DashboardVar(2796.04 ,"velocityConst", this::class)
+
+    private var allianceColor: AllianceColor by DashboardVar(AllianceColor.RED, "allianceColor", this::class)
+    private var targetVelocity: Double = 0.0
 
     private val k1: Double
         get() = -12.0/accelDuration1
@@ -49,7 +56,8 @@ class CarouselAccelerationTest: OpMode() {
 
         telemetry = MultipleTelemetry(telemetry, FtcDashboard.getInstance().telemetry)
 
-//        carouselMotor.mode = DcMotor.RunMode.RUN_USING_ENCODER
+
+        carouselMotor.mode = DcMotor.RunMode.RUN_USING_ENCODER
 //        carouselMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, PIDFCoefficients(p, i, d, f))
     }
 
@@ -62,7 +70,7 @@ class CarouselAccelerationTest: OpMode() {
         }
 
         val elapsedTime = (System.currentTimeMillis() / 1000.0) - motionStart
-        carouselMotor.power = when (elapsedTime) {
+        targetVelocity = when (elapsedTime) {
             in 0.0..accelStart -> initialSpeed
             in accelStart..(accelStart + accelDuration1) -> initialSpeed + (deltaVel1 / (1 + exp(k1 * (elapsedTime - a))))
             in (accelStart + accelDuration1)..(accelStart + accelDuration1 + accelDelayDuration) -> intermediateSpeed
@@ -72,9 +80,12 @@ class CarouselAccelerationTest: OpMode() {
         } * when(allianceColor) {
             AllianceColor.RED -> 1.0
             AllianceColor.BLUE -> -1.0
-        }
 
-        telemetry.addData("carousel speed", carouselMotor.power)
+        } * velocityConstant
+        carouselMotor.velocity = targetVelocity
+
+        telemetry.addData("carousel speed", carouselMotor.velocity)
+        telemetry.addData("target carousel speed", targetVelocity)
         telemetry.addData("elapsed time", elapsedTime)
         telemetry.addData("total Duck time", accelDuration1 + accelDelayDuration + accelDuration2 + constDuration)
     }
