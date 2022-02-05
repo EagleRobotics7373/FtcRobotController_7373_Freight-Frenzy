@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode.opmodes
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx
-import com.arcrobotics.ftclib.gamepad.GamepadKeys
 import com.arcrobotics.ftclib.gamepad.GamepadKeys.Button.*
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.util.ElapsedTime
+import org.firstinspires.ftc.teamcode.library.functions.AllianceColor
+import org.firstinspires.ftc.teamcode.library.functions.AllianceColor.Companion.persistingAllianceColor
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
 import org.firstinspires.ftc.teamcode.library.robot.systems.lt.TseGrabber
 import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem
@@ -29,7 +30,10 @@ class TeleOpCore: OpMode() {
     private var zeroAngle = 0.0
     private var lastTimeRead = 0.0
 
-    private var defaultCarouselSpeed = -0.50/*by DashboardVar(-0.25, "defaultCarouselSpeed", this::class)*/
+    private var defaultCarouselSpeed = when (persistingAllianceColor) {
+        AllianceColor.BLUE -> -0.50
+        AllianceColor.RED -> 0.50
+    } /*by DashboardVar(-0.25, "defaultCarouselSpeed", this::class)*/
     private var maxCarouselSpeed = 0.8/*by DashboardVar(0.6, "defaultCarouselSpeed", this::class) {it in 0.0..1.0}*/
 
     private var depositLiftPowerAuto = 0.5/*by DashboardVar(0.5, "depositLiftPowerAuto", this::class) { it.absoluteValue <= 1.0}*/
@@ -47,7 +51,8 @@ class TeleOpCore: OpMode() {
     override fun init() {
         robot = ExtThinBot(hardwareMap)
         robot.holonomic.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE)
-        robot.carouselMotor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        robot.carouselMotorSystem.carouselMotor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        robot.carouselMotorSystem.carouselMotor.mode = DcMotor.RunMode.RUN_USING_ENCODER
         robot.odometryLift.raise()
 
         gamepad1Ex = GamepadEx(gamepad1)
@@ -82,11 +87,11 @@ class TeleOpCore: OpMode() {
             robot.fullIntakeSystem.intakeManual(0.0)
 
         // Control carousel motor
-        robot.carouselMotor.power = when {
-            gamepad2CanControlExtras && gamepad2.left_stick_y.absoluteValue > 0.05 ->
-                gamepad2.left_stick_y.toDouble().coerceIn(-maxCarouselSpeed, maxCarouselSpeed)
-            gamepad2CanControlExtras && gamepad2.left_trigger > 0.05 -> gamepad2.left_trigger * defaultCarouselSpeed
-            gamepad1CanControlAccessories && gamepad1.left_trigger > 0.05 -> gamepad1.left_trigger * defaultCarouselSpeed
+        robot.carouselMotorSystem.carouselMotor.power = when {
+//            gamepad2CanControlExtras && gamepad2.left_stick_y.absoluteValue > 0.05 ->
+//                gamepad2.left_stick_y.toDouble().coerceIn(-maxCarouselSpeed, maxCarouselSpeed)
+//            gamepad2CanControlExtras && gamepad2.left_trigger > 0.05 -> gamepad2.left_trigger * defaultCarouselSpeed
+//            gamepad1CanControlAccessories && gamepad1.left_trigger > 0.05 -> gamepad1.left_trigger * defaultCarouselSpeed
             gamepad2.left_bumper -> defaultCarouselSpeed
             else -> 0.0
         }
@@ -98,12 +103,13 @@ class TeleOpCore: OpMode() {
             (gamepad2CanControlExtras && gamepad2Ex.wasJustPressed(DPAD_DOWN))
                    -> defaultCarouselSpeed -= 0.05
             (gamepad2CanControlExtras && gamepad2Ex.wasJustPressed(X))
-                    || (gamepad1CanControlAccessories && gamepad1Ex.wasJustPressed(X)) -> defaultCarouselSpeed *= -1.0
+                    || (gamepad1CanControlAccessories && gamepad1Ex.wasJustPressed(X)) -> robot.carouselMotorSystem.start()
             (gamepad2CanControlExtras && gamepad2Ex.wasJustPressed(DPAD_LEFT)) ->
-                robot.carouselMotor.zeroPowerBehavior =
-                        if (robot.carouselMotor.zeroPowerBehavior == DcMotor.ZeroPowerBehavior.FLOAT) DcMotor.ZeroPowerBehavior.BRAKE
+                robot.carouselMotorSystem.carouselMotor.zeroPowerBehavior =
+                        if (robot.carouselMotorSystem.carouselMotor.zeroPowerBehavior == DcMotor.ZeroPowerBehavior.FLOAT) DcMotor.ZeroPowerBehavior.BRAKE
                         else DcMotor.ZeroPowerBehavior.FLOAT
         }
+        if (!gamepad2.left_bumper) robot.carouselMotorSystem.run()
 
         // Control deposit lift
         val depositLiftPower = if (gamepad2CanControlExtras) gamepad2.right_stick_y.toDouble()*0.5 else 0.0
@@ -132,7 +138,7 @@ class TeleOpCore: OpMode() {
             when {
 //                gamepad2Ex.wasJustPressed(A) -> robot.tseGrabber.nextState()
 //                gamepad2Ex.wasJustPressed(B) -> robot.tseGrabber.prevState()
-                gamepad2Ex.wasJustPressed(Y) -> robot.tseGrabber.move(pivot = TseGrabber.PivotPosition.RELEASE_HIGHER)
+//                gamepad2Ex.wasJustPressed(Y) -> robot.tseGrabber.move(pivot = TseGrabber.PivotPosition.RELEASE_HIGHER)
             }
         }
 
@@ -178,7 +184,7 @@ class TeleOpCore: OpMode() {
         telemetry.addLine()
         telemetry.addData("Carousel speed", defaultCarouselSpeed)
         telemetry.addData("Carousel side", if (defaultCarouselSpeed < 0) "BLUE" else "RED")
-        telemetry.addData("Carousel stop behavior", robot.carouselMotor.zeroPowerBehavior)
+        telemetry.addData("Carousel stop behavior", robot.carouselMotorSystem.carouselMotor.zeroPowerBehavior)
         telemetry.addLine()
         telemetry.addData("Deposit lift power", depositLiftPower)
         telemetry.addData("Deposit lift position", robot.depositLiftMotor.currentPosition)

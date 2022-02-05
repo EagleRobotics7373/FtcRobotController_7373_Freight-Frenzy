@@ -1,10 +1,10 @@
 package org.firstinspires.ftc.teamcode.opmodes
 
-import android.graphics.Color
 import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.geometry.Vector2d
 import org.firstinspires.ftc.teamcode.library.functions.*
 import org.firstinspires.ftc.teamcode.library.functions.AllianceColor.*
+import org.firstinspires.ftc.teamcode.library.functions.AllianceColor.Companion.persistingAllianceColor
 import org.firstinspires.ftc.teamcode.library.functions.StartingPosition.*
 import org.firstinspires.ftc.teamcode.library.functions.PostAllianceHubTask.*
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
@@ -36,6 +36,7 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
     private var safeModeErrorThreshold: Int by config.int("Safe Mode Error Threshold", 10, 0..30 step 2)
 
     override fun runOpMode() {
+        persistingAllianceColor = allianceColor
         robot = ExtThinBot(hardwareMap)
         robot.webcamServo.position = 0.1
         super.autonomousConfig()
@@ -128,9 +129,9 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
                             .buildAndRun()
 
                     //Turn Carousel
-                    robot.carouselMotor.power = (0.45) reverseIf BLUE
+                    robot.carouselMotorSystem.carouselMotor.power = (0.45) reverseIf BLUE
                     sleep(6000)
-                    robot.carouselMotor.velocity = 0.0
+                    robot.carouselMotorSystem.carouselMotor.velocity = 0.0
 
                     builder(Math.PI/2 reverseIf BLUE)
                             .splineToConstantHeading(

@@ -1,7 +1,11 @@
 package org.firstinspires.ftc.teamcode.library.functions
 
 enum class AllianceColor {
-    RED, BLUE
+    RED, BLUE;
+
+    companion object {
+        @JvmField var persistingAllianceColor: AllianceColor = BLUE
+    }
 }
 
 enum class AutonomousObjective {

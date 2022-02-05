@@ -23,7 +23,7 @@ class ParkingAutonomous : BaseAutonomous<ExtThinBot>() {
 //        cvContainer = VisionFactory.createOpenCv(hardwareMap, "Webcam 1", ColorMarkerVisionPipeline())
 //        cvContainer.pipeline.shouldKeepTracking = true
 //        cvContainer.pipeline.tracking = true
-        robot.carouselMotor.mode = DcMotor.RunMode.RUN_USING_ENCODER
+        robot.carouselMotorSystem.carouselMotor.mode = DcMotor.RunMode.RUN_USING_ENCODER
 
         super.operateMenu(null)
 
@@ -44,7 +44,7 @@ class ParkingAutonomous : BaseAutonomous<ExtThinBot>() {
         sleep(drivingTime.toLong())
 
         robot.holonomic.stop()
-        robot.carouselMotor.velocity = 0.0
+        robot.carouselMotorSystem.carouselMotor.velocity = 0.0
 
     }
 

@@ -9,12 +9,13 @@ import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.Two
 import org.firstinspires.ftc.teamcode.library.robot.systems.lt.OdometryLiftSystem
 import org.firstinspires.ftc.teamcode.library.robot.systems.lt.TseGrabber
 import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem
+import org.firstinspires.ftc.teamcode.library.robot.systems.st.CarouselMotorSystem
 
 class ExtThinBot(_hardwareMap: HardwareMap): BaseRobot(_hardwareMap) {
 
     @JvmField val intakeMotor1 : DcMotorEx = hwInit("intakeMotor1")
     @JvmField val intakeMotor2 : DcMotorEx = hwInit("intakeMotor2")
-    @JvmField val carouselMotor : DcMotorEx = hwInit("carouselMotor")
+    @JvmField val carouselMotorSystem : CarouselMotorSystem = CarouselMotorSystem(hwInit("carouselMotor"))
     @JvmField val depositLiftMotor : DcMotorEx = hwInit("depositLiftMotor")
     @JvmField val depositServo : Servo = hwInit("depositServo")
     @JvmField val webcamServo : Servo = hwInit("webcamServo")
@@ -25,7 +26,7 @@ class ExtThinBot(_hardwareMap: HardwareMap): BaseRobot(_hardwareMap) {
 
     @JvmField val imuControllerC = IMUController(hardwareMap, id = 'C')
     override val holonomicRR: HolonomicRR = HolonomicRR(imuControllerC, frontLeftMotor, backLeftMotor, backRightMotor, frontRightMotor,
-                                    TwoWheelOdometryLocalizer(carouselMotor, intakeMotor1, imuControllerC))
+                                    TwoWheelOdometryLocalizer(intakeMotor2, intakeMotor1, imuControllerC))
 
     init {
         intakeMotor1.direction = DcMotorSimple.Direction.REVERSE
