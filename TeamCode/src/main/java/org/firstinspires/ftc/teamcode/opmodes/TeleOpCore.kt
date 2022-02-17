@@ -6,6 +6,9 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.util.ElapsedTime
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference
 import org.firstinspires.ftc.teamcode.library.functions.AllianceColor
 import org.firstinspires.ftc.teamcode.library.functions.AllianceColor.Companion.persistingAllianceColor
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
@@ -41,6 +44,12 @@ class TeleOpCore: OpMode() {
 
     private lateinit var elapsedTime: ElapsedTime
 
+    private var initialTilt: Double = -1.57
+    private val tiltThreshhold: Double = 0.1
+
+    private val orientation get() = robot.imuControllerC.imuA.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS)
+    private val currentTilt get() = robot.imuControllerC.imuA.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS).secondAngle.toDouble()
+
     private val gamepad1CanControlAccessories: Boolean
         get() = gamepad1.left_bumper && gamepad1.right_bumper
 
@@ -57,9 +66,15 @@ class TeleOpCore: OpMode() {
         gamepad1Ex = GamepadEx(gamepad1)
         gamepad2Ex = GamepadEx(gamepad2)
         elapsedTime = ElapsedTime()
+
+        initialTilt = currentTilt
     }
 
     override fun loop() {
+
+        if ((currentTilt - initialTilt).absoluteValue >= tiltThreshhold) {
+            gamepad1.rumble(1.0,1.0,1000)
+        }
 
         gamepad1Ex.readButtons()
         gamepad2Ex.readButtons()
@@ -203,6 +218,10 @@ class TeleOpCore: OpMode() {
         telemetry.addData("gamepad2.left_trigger", gamepad2.left_trigger)
         telemetry.addData("gamepad1.right_trigger", gamepad1.right_trigger)
         telemetry.addData("gamepad1.left_trigger", gamepad1.left_trigger)
+        telemetry.addLine()
+        telemetry.addData("Z Orientation", orientation.firstAngle)
+        telemetry.addData("Y Orientation", orientation.secondAngle)
+        telemetry.addData("X Orientation", orientation.thirdAngle)
 
         robot.fullIntakeSystem.update()
     }

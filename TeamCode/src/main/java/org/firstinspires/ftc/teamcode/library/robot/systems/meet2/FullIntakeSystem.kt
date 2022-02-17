@@ -75,7 +75,7 @@ class FullIntakeSystem(
     }
 
     enum class DepositLiftPosition(val ticks: Int) {
-        LOW(0),
+        LOW(-30),
         MIDDLE(-625),
         HIGH(-1220),
         TSE(0);
