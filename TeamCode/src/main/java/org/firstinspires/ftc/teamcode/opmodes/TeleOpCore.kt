@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.library.functions.AllianceColor
 import org.firstinspires.ftc.teamcode.library.functions.AllianceColor.Companion.persistingAllianceColor
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
-import org.firstinspires.ftc.teamcode.library.robot.systems.lt.TseGrabber
 import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem
 import kotlin.math.absoluteValue
 import kotlin.math.pow

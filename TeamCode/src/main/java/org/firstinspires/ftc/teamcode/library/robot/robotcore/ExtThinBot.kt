@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.hardware.Servo
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.HolonomicRR
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.TwoWheelOdometryLocalizer
 import org.firstinspires.ftc.teamcode.library.robot.systems.lt.OdometryLiftSystem
-import org.firstinspires.ftc.teamcode.library.robot.systems.lt.TseGrabber
 import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem
 import org.firstinspires.ftc.teamcode.library.robot.systems.st.CarouselMotorSystem
 
@@ -20,7 +19,7 @@ class ExtThinBot(_hardwareMap: HardwareMap): BaseRobot(_hardwareMap) {
     @JvmField val depositServo : Servo = hwInit("depositServo")
     @JvmField val webcamServo : Servo = hwInit("webcamServo")
     @JvmField val odometryLift: OdometryLiftSystem = OdometryLiftSystem(hwInit("odometryServoLeft"), hwInit("odometryServoCenter"))
-    @JvmField val tseGrabber: TseGrabber = TseGrabber(hwInit("tseGrabberPivotServo"), hwInit("tseGrabberServo"))
+//    @JvmField val tseGrabber: TseGrabber = TseGrabber(hwInit("tseGrabberPivotServo"), hwInit("tseGrabberServo"))
 
     @JvmField val fullIntakeSystem = FullIntakeSystem(depositLiftMotor, depositServo, intakeMotor1, intakeMotor2)
 
