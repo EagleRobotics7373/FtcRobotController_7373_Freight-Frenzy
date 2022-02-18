@@ -93,13 +93,14 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
             }
             telem.addData("Deposit Position for ${cvContainer.pipeline.allianceColor} Alliance", depositPosition)
             telem.update()
+            robot.webcamServo.position = 0.84
 
             sleep(extraDelayBeforeStart.toLong())
 
             builder(Math.PI/2 reverseIf BLUE)
                     .splineToConstantHeading(Vector2d(
                             -12.5,
-                            (if (depositPosition == LOW) -45.5 else -44.0) reverseIf BLUE), Math.PI/2 reverseIf BLUE)
+                            (if (depositPosition == LOW) -45.5+3 else -44.0+3) reverseIf BLUE), Math.PI/2 reverseIf BLUE)
                     .buildAndRun(safeMode = true)
             if (robot.holonomicRR.safeModeLastTriggered != null) {
                 telem.addLine("EMERGENCY STOP!!!")
@@ -127,16 +128,21 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
                     builder(-PI/2 reverseIf BLUE)
                             .splineToConstantHeading(Vector2d(-66.0, -56.5 reverseIf BLUE), PI)
                             .buildAndRun()
-
+                    sleep(200)
+                    robot.holonomicRR.turnSync(25.0.toRadians().reverseIf(RED))
+                    sleep(200)
+                    builder()
+                            .forward(1.5)
+                            .buildAndRun()
                     //Turn Carousel
                     robot.carouselMotorSystem.carouselMotor.power = (0.45) reverseIf BLUE
                     sleep(6000)
                     robot.carouselMotorSystem.carouselMotor.velocity = 0.0
 
-                    builder(Math.PI/2 reverseIf BLUE)
+                    builder(0.0 reverseIf BLUE)
                             .splineToConstantHeading(
-                                    Vector2d(-62.0, -36.0 reverseIf BLUE),
-                                    Math.PI / 2 reverseIf BLUE
+                                    Vector2d(-60.0, -35.0 reverseIf BLUE),
+                                    -Math.PI
                             )
                             .buildAndRun()
                 }
@@ -148,7 +154,7 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
                             )
                             .buildAndRun()
                     builder().strafeLeft(4.0 reverseIf RED).buildAndRun()
-                    builder().forward(30.0).buildAndRun()
+                    builder().forward(50.0).buildAndRun()
                 }
                 BACKPEDAL -> {
                     builder()
@@ -170,7 +176,7 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
 
     private fun setWebcamServoPosition() {
         robot.webcamServo.position = when (startingPosition) {
-            CENTER -> 0.45
+            CENTER -> 0.49
             else -> 0.55
         }
     }

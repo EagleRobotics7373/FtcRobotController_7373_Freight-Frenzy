@@ -279,7 +279,7 @@ constructor (
      */
     @JvmOverloads fun followTrajectory(trajectory: Trajectory, waypointActions: List<Pair<Double, ()->Unit>> = emptyList()) {
 
-        doMotorConfigForAutonomous()
+//        doMotorConfigForAutonomous()
 
         follower.followTrajectory(trajectory)
         lastReadTime = System.currentTimeMillis()
@@ -310,7 +310,7 @@ constructor (
      */
     fun turn(angle: Double) {
 
-        doMotorConfigForAutonomous()
+//        doMotorConfigForAutonomous()
 
         val heading = poseEstimate.heading
 

@@ -222,6 +222,15 @@ class TeleOpCore: OpMode() {
         telemetry.addData("Z Orientation", orientation.firstAngle)
         telemetry.addData("Y Orientation", orientation.secondAngle)
         telemetry.addData("X Orientation", orientation.thirdAngle)
+        telemetry.addLine()
+        telemetry.addData("Gamepad1 Finger1 X", gamepad1.touchpad_finger_1_x)
+        telemetry.addData("Gamepad1 Finger1 Y", gamepad1.touchpad_finger_1_y)
+        telemetry.addData("Gamepad1 Finger2 X", gamepad1.touchpad_finger_2_x)
+        telemetry.addData("Gamepad1 Finger2 Y", gamepad1.touchpad_finger_2_y)
+        telemetry.addData("Gamepad2 Finger1 X", gamepad2.touchpad_finger_1_x)
+        telemetry.addData("Gamepad2 Finger1 Y", gamepad2.touchpad_finger_1_y)
+        telemetry.addData("Gamepad2 Finger2 X", gamepad2.touchpad_finger_2_x)
+        telemetry.addData("Gamepad2 Finger2 Y", gamepad2.touchpad_finger_2_y)
 
         robot.fullIntakeSystem.update()
     }

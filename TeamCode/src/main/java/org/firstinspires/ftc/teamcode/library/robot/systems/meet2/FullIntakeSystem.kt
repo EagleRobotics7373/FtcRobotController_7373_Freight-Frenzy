@@ -18,7 +18,7 @@ class FullIntakeSystem(
     // Deposit servo positions
     private var depositServoIn by DashboardVar(0.8, "depositServoIn", this::class)
     private var depositServoMid by DashboardVar(0.7, "depositServoMid", this::class)
-    private var depositServoOut by DashboardVar(0.2, "depositServoOut", this::class)
+    private var depositServoOut by DashboardVar(0.26, "depositServoOut", this::class)
 
     var depositServoIsExtended: Boolean = false
     set(newValue) {

@@ -11,8 +11,11 @@ public class DriveConstantsThinBot {
     public static double GEAR_RATIO = 1;
     public static double TRACK_WIDTH = 14.0;
 
-    public static double MAX_RPM = 435;
-    public static double TICKS_PER_REV = 384.5;
+    //uncomment for 435rpm motors
+//    public static double MAX_RPM = 435;
+//    public static double TICKS_PER_REV = 384.5;
+    public static double MAX_RPM = 312;
+    public static double TICKS_PER_REV = 537.7;
 
     public static double kV = /*0.0035 .00772*/  /* 1.0 / rpmToVelocity(getMaxRpm())*/ 0.006;
     public static double kA = 0.0;
