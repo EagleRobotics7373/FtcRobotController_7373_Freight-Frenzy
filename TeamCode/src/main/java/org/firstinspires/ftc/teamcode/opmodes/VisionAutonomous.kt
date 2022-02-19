@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.library.functions.AllianceColor.Companion.
 import org.firstinspires.ftc.teamcode.library.functions.StartingPosition.*
 import org.firstinspires.ftc.teamcode.library.functions.PostAllianceHubTask.*
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
+import org.firstinspires.ftc.teamcode.library.robot.systems.lt.TseGrabber
 import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem.DepositLiftPosition
 import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem.DepositLiftPosition.*
 import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
@@ -36,9 +37,9 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
     private var safeModeErrorThreshold: Int by config.int("Safe Mode Error Threshold", 10, 0..30 step 2)
 
     override fun runOpMode() {
-        persistingAllianceColor = allianceColor
         robot = ExtThinBot(hardwareMap)
         robot.webcamServo.position = 0.1
+        robot.tseGrabber.state = TseGrabber.TseGrabberState.STORAGE
         super.autonomousConfig()
         robot.holonomicRR.safeModeErrorThreshold = safeModeErrorThreshold
         val cvContainer = VisionFactory.createOpenCv(
@@ -54,6 +55,7 @@ class VisionAutonomous : BaseAutonomous<ExtThinBot>() {
         }
 
         if (opModeIsActive()) {
+            persistingAllianceColor = allianceColor
             cvContainer.pipeline.allianceColor = allianceColor
             cvContainer.pipeline.tracking = true
             cvContainer.pipeline.shouldKeepTracking = true

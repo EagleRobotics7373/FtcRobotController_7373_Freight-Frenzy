@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.library.functions
 
 class ToggleButtonWatcher(private val getMethod: ()->Boolean) {
-    private var lastState : Boolean = getMethod()
+    var lastState : Boolean = getMethod()
     operator fun invoke(): Boolean {
         if (getMethod()) {
             if (!lastState) {

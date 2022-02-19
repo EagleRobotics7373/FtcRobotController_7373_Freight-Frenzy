@@ -3,21 +3,22 @@ package org.firstinspires.ftc.teamcode.library.robot.systems.st
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import org.firstinspires.ftc.teamcode.library.functions.AllianceColor
 import org.firstinspires.ftc.teamcode.library.functions.AllianceColor.Companion.persistingAllianceColor
+import org.firstinspires.ftc.teamcode.library.functions.DashboardVar
 import kotlin.math.exp
 
 class CarouselMotorSystem
 constructor(val carouselMotor : DcMotorEx)
 {
     var motionStart: Double = Double.NEGATIVE_INFINITY
-    private var accelStart: Double = 0.01
-    private var accelDuration1: Double = 0.25
-    private var accelDelayDuration: Double = 0.0
-    private var accelDuration2: Double = 0.75
-    private var constDuration: Double = 1.0
+    private var accelStart: Double by DashboardVar(0.5, "accelStart", this::class)
+    private var accelDuration1: Double by DashboardVar(0.20, "accelDuration1", this::class)
+    private var accelDelayDuration: Double by DashboardVar(0.4, "accelDelayDuration", this::class)
+    private var accelDuration2: Double by DashboardVar(0.20, "accelDuration2", this::class)
+    private var constDuration: Double by DashboardVar(0.5, "constDuration", this::class)
 
-    private var initialSpeed: Double = 0.5
-    private var intermediateSpeed: Double = 0.9
-    private var finalSpeed: Double = 1.0
+    private var initialSpeed: Double by DashboardVar(0.6, "initialSpeed", this::class)
+    private var intermediateSpeed: Double by DashboardVar(0.8, "intermediateSpeed", this::class)
+    private var finalSpeed: Double by DashboardVar(0.9, "finalSpeed", this::class)
 
     private var velocityConstant: Double = 2796.04
 

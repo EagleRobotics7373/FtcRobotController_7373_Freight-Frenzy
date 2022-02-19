@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.opmodes
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx
+import com.arcrobotics.ftclib.gamepad.GamepadKeys
 import com.arcrobotics.ftclib.gamepad.GamepadKeys.Button.*
+import com.arcrobotics.ftclib.gamepad.ToggleButtonReader
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
@@ -11,6 +13,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference
 import org.firstinspires.ftc.teamcode.library.functions.AllianceColor
 import org.firstinspires.ftc.teamcode.library.functions.AllianceColor.Companion.persistingAllianceColor
+import org.firstinspires.ftc.teamcode.library.functions.ToggleButtonWatcher
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
 import org.firstinspires.ftc.teamcode.library.robot.systems.lt.TseGrabber
 import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem
@@ -26,7 +29,7 @@ class TeleOpCore: OpMode() {
 
     private var reverse = false/* by DashboardVar(false, "reverse", this::class)*/
     private var speed = 3/*by DashboardVar(1, "speed", this::class) {it in 1..3}*/
-    private var speedMax: Double = 4.0
+    private var speedMax: Double = 5.0
     private var maxRpm = 435
     private var cubicEnable = false
     private var fod = false
@@ -57,6 +60,9 @@ class TeleOpCore: OpMode() {
     private val gamepad2CanControlExtras: Boolean
         get() = gamepad2.right_bumper
 
+    private lateinit var toggleGamepad1TouchpadPress: ToggleButtonWatcher
+    private lateinit var toggleGamepad2TouchpadPress: ToggleButtonWatcher
+
     override fun init() {
         robot = ExtThinBot(hardwareMap)
         robot.holonomic.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE)
@@ -70,9 +76,13 @@ class TeleOpCore: OpMode() {
         elapsedTime = ElapsedTime()
 
         initialTilt = currentTilt
+
+        toggleGamepad1TouchpadPress = ToggleButtonWatcher { gamepad1.touchpad }
+        toggleGamepad2TouchpadPress = ToggleButtonWatcher { gamepad2.touchpad }
     }
 
     override fun loop() {
+
 
         if ((currentTilt - initialTilt).absoluteValue >= tiltThreshhold) {
             gamepad1.rumble(1.0,1.0,1000)
@@ -80,6 +90,8 @@ class TeleOpCore: OpMode() {
 
         gamepad1Ex.readButtons()
         gamepad2Ex.readButtons()
+        toggleGamepad1TouchpadPress()
+        toggleGamepad2TouchpadPress()
 
         // Control deposit servo
         when {
@@ -124,6 +136,10 @@ class TeleOpCore: OpMode() {
                 robot.carouselMotorSystem.carouselMotor.zeroPowerBehavior =
                         if (robot.carouselMotorSystem.carouselMotor.zeroPowerBehavior == DcMotor.ZeroPowerBehavior.FLOAT) DcMotor.ZeroPowerBehavior.BRAKE
                         else DcMotor.ZeroPowerBehavior.FLOAT
+            (gamepad2Ex.wasJustPressed(LEFT_STICK_BUTTON)) -> {
+                defaultCarouselSpeed *= -1
+                persistingAllianceColor = if (persistingAllianceColor == AllianceColor.BLUE) AllianceColor.RED else AllianceColor.BLUE
+            }
         }
         if (!gamepad2.left_bumper) robot.carouselMotorSystem.run()
 
@@ -159,6 +175,13 @@ class TeleOpCore: OpMode() {
                 gamepad2Ex.wasJustPressed(Y) -> robot.tseGrabber.move(pivot = TseGrabber.PivotPosition.RELEASE_HIGHER)
             }
         }
+        if (toggleGamepad2TouchpadPress.lastState) {
+            when {
+                gamepad2.touchpad_finger_1_x > 0.3 -> robot.tseGrabber.nextState()
+                gamepad2.touchpad_finger_1_x < -0.3 -> robot.tseGrabber.prevState()
+                gamepad2.touchpad_finger_1_y > 0.6 -> robot.tseGrabber.state = TseGrabber.TseGrabberState.STORAGE
+            }
+        }
 
         if ((gamepad2.y && !gamepad2CanControlExtras) || gamepad1CanControlAccessories && gamepad1.y) robot.fullIntakeSystem.resetDepositZero()
 
@@ -171,6 +194,14 @@ class TeleOpCore: OpMode() {
                 gamepad1Ex.wasJustPressed(DPAD_UP) -> if (speed < speedMax) speed++
                 gamepad1Ex.wasJustPressed(DPAD_DOWN) -> if (speed > 1) speed--
                 gamepad1Ex.wasJustPressed(DPAD_LEFT) -> cubicEnable = !cubicEnable
+                toggleGamepad1TouchpadPress.lastState -> {
+                    speed = when {
+                        gamepad1.touchpad_finger_1_x < -0.5 -> 2
+                        gamepad1.touchpad_finger_1_x < 0.0 -> 3
+                        gamepad1.touchpad_finger_1_x < 0.5 -> 4
+                        else -> 5
+                    }
+                }
             }
 
             // Reverse drivetrain, and cubic enable
@@ -194,15 +225,17 @@ class TeleOpCore: OpMode() {
         telemetry.addData("Time Δ (ms)", currentTime - lastTimeRead)
         telemetry.addLine()
         lastTimeRead = currentTime
-
         telemetry.addData("Drivetrain speed", "$speed out of $speedMax")
         telemetry.addData("Drivetrain speed adj", speed/speedMax)
         telemetry.addData("Drivetrain max rpm", maxRpm * (speed/speedMax))
         telemetry.addData("Cubic enable", cubicEnable)
         telemetry.addLine()
+        telemetry.addData("Carousel speed (current)", robot.carouselMotorSystem.carouselMotor)
         telemetry.addData("Carousel speed", defaultCarouselSpeed)
-        telemetry.addData("Carousel side", if (defaultCarouselSpeed < 0) "BLUE" else "RED")
+        telemetry.addData("Carousel side (regular)", if (defaultCarouselSpeed < 0) "BLUE" else "RED")
+        telemetry.addData("Carousel side (Duck Functions)", persistingAllianceColor)
         telemetry.addData("Carousel stop behavior", robot.carouselMotorSystem.carouselMotor.zeroPowerBehavior)
+        telemetry.addData("TSE Grabber position", robot.tseGrabber.state)
         telemetry.addLine()
         telemetry.addData("Deposit lift power", depositLiftPower)
         telemetry.addData("Deposit lift position", robot.depositLiftMotor.currentPosition)
@@ -227,14 +260,20 @@ class TeleOpCore: OpMode() {
         telemetry.addData("Y Orientation", orientation.secondAngle)
         telemetry.addData("X Orientation", orientation.thirdAngle)
         telemetry.addLine()
+        telemetry.addData("Gamepad1 Touchpad Press", gamepad1.touchpad)
         telemetry.addData("Gamepad1 Finger1 X", gamepad1.touchpad_finger_1_x)
         telemetry.addData("Gamepad1 Finger1 Y", gamepad1.touchpad_finger_1_y)
+        telemetry.addData("Gamepad1 Finger 1 Press", gamepad1.touchpad_finger_1)
         telemetry.addData("Gamepad1 Finger2 X", gamepad1.touchpad_finger_2_x)
         telemetry.addData("Gamepad1 Finger2 Y", gamepad1.touchpad_finger_2_y)
+        telemetry.addData("Gamepad1 Finger 2 Press", gamepad1.touchpad_finger_2)
+        telemetry.addData("Gamepad2 Touchpad Press", gamepad2.touchpad)
         telemetry.addData("Gamepad2 Finger1 X", gamepad2.touchpad_finger_1_x)
         telemetry.addData("Gamepad2 Finger1 Y", gamepad2.touchpad_finger_1_y)
+        telemetry.addData("Gamepad1 Finger 1 Press", gamepad2.touchpad_finger_1)
         telemetry.addData("Gamepad2 Finger2 X", gamepad2.touchpad_finger_2_x)
         telemetry.addData("Gamepad2 Finger2 Y", gamepad2.touchpad_finger_2_y)
+        telemetry.addData("Gamepad1 Finger 2 Press", gamepad2.touchpad_finger_2)
 
         robot.fullIntakeSystem.update()
     }
