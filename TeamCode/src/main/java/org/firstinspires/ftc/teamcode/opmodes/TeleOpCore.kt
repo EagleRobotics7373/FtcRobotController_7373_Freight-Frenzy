@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference
 import org.firstinspires.ftc.teamcode.library.functions.AllianceColor
 import org.firstinspires.ftc.teamcode.library.functions.AllianceColor.Companion.persistingAllianceColor
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtThinBot
+import org.firstinspires.ftc.teamcode.library.robot.systems.lt.TseGrabber
 import org.firstinspires.ftc.teamcode.library.robot.systems.meet2.FullIntakeSystem
 import kotlin.math.absoluteValue
 import kotlin.math.pow
@@ -62,6 +63,7 @@ class TeleOpCore: OpMode() {
         robot.carouselMotorSystem.carouselMotor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
         robot.carouselMotorSystem.carouselMotor.mode = DcMotor.RunMode.RUN_USING_ENCODER
         robot.odometryLift.raise()
+        robot.tseGrabber.state = TseGrabber.TseGrabberState.STORAGE
 
         gamepad1Ex = GamepadEx(gamepad1)
         gamepad2Ex = GamepadEx(gamepad2)
@@ -81,8 +83,8 @@ class TeleOpCore: OpMode() {
 
         // Control deposit servo
         when {
-            (gamepad2.a/* && !gamepad2CanControlExtras*/) || gamepad1CanControlAccessories && gamepad1.a -> robot.fullIntakeSystem.depositServoIsExtended = true
-            (gamepad2.b/* && !gamepad2CanControlExtras*/) || gamepad1CanControlAccessories && gamepad1.b -> robot.fullIntakeSystem.depositServoIsExtended = false
+            (gamepad2.a && !gamepad2CanControlExtras) || gamepad1CanControlAccessories && gamepad1.a -> robot.fullIntakeSystem.depositServoIsExtended = true
+            (gamepad2.b && !gamepad2CanControlExtras) || gamepad1CanControlAccessories && gamepad1.b -> robot.fullIntakeSystem.depositServoIsExtended = false
         }
 
         // Control both intake motors
@@ -142,6 +144,8 @@ class TeleOpCore: OpMode() {
                     robot.fullIntakeSystem.depositLiftAuto(FullIntakeSystem.DepositLiftPosition.LOW, depositLiftPowerAuto)
                 !gamepad2CanControlExtras && gamepad2.dpad_right || gamepad1CanControlAccessories && gamepad1.dpad_right ->
                     robot.fullIntakeSystem.depositLiftAuto(FullIntakeSystem.DepositLiftPosition.MIDDLE, depositLiftPowerAuto)
+                !gamepad2CanControlExtras && gamepad2.dpad_left || gamepad1CanControlAccessories && gamepad1.dpad_left ->
+                    robot.fullIntakeSystem.depositLiftAuto(FullIntakeSystem.DepositLiftPosition.TSE, depositLiftPowerAuto)
                 !gamepad2CanControlExtras && gamepad2.dpad_up || gamepad1CanControlAccessories && gamepad1.dpad_up ->
                     robot.fullIntakeSystem.depositLiftAuto(FullIntakeSystem.DepositLiftPosition.HIGH, depositLiftPowerAuto)
             }
@@ -150,9 +154,9 @@ class TeleOpCore: OpMode() {
         // TSE Grabber
         if (gamepad2CanControlExtras) {
             when {
-//                gamepad2Ex.wasJustPressed(A) -> robot.tseGrabber.nextState()
-//                gamepad2Ex.wasJustPressed(B) -> robot.tseGrabber.prevState()
-//                gamepad2Ex.wasJustPressed(Y) -> robot.tseGrabber.move(pivot = TseGrabber.PivotPosition.RELEASE_HIGHER)
+                gamepad2Ex.wasJustPressed(A) -> robot.tseGrabber.nextState()
+                gamepad2Ex.wasJustPressed(B) -> robot.tseGrabber.prevState()
+                gamepad2Ex.wasJustPressed(Y) -> robot.tseGrabber.move(pivot = TseGrabber.PivotPosition.RELEASE_HIGHER)
             }
         }
 

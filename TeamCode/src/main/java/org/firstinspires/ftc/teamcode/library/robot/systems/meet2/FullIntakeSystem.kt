@@ -78,6 +78,6 @@ class FullIntakeSystem(
         LOW(-30),
         MIDDLE(-625),
         HIGH(-1220),
-        TSE(0);
+        TSE(-1000);
     }
 }

@@ -13,7 +13,7 @@ class SelectableServoTest : OpMode() {
     lateinit var servos : Array<Servo>
 
     var useGamepadTrigger = true
-    var enable = true
+    var enable = false
     var tenths = 0
     var hundredths = 0
 

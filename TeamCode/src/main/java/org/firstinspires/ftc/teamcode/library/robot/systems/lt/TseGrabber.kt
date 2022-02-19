@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.Servo
 class TseGrabber
 constructor (private val pivotServo : Servo,
              private val grabServo  : Servo,
+             private val wristServo : Servo,
              private val reverse    : Boolean = false)
 {
 
@@ -12,19 +13,27 @@ constructor (private val pivotServo : Servo,
     Enum class defining positions for the arm to pivot
      */
     enum class PivotPosition(val position: Double) {
-        GRAB(0.12),
-        RELEASE(0.38),
-        RELEASE_HIGHER(0.45),
-        STORAGE(0.87),
+        GRAB(0.14),
+        RELEASE(0.5),
+        RELEASE_HIGHER(0.55),
+        STORAGE(0.84),
     }
 
     /**
     Enum class defining positions for the grabber to pivot
      */
     enum class GrabPosition(val position: Double) {
-        GRAB(0.07),
-        MID_GRAB(0.40),
+        GRAB(0.00),
+        MID_GRAB(0.35),
         STORAGE(0.14)
+    }
+
+    /**
+    Enum class defining positions for the wrist to pivit
+     */
+    enum class WristPosition(val position: Double) {
+        GROUND(0.14),
+        HIGH(0.54)
     }
 
     /**
@@ -39,10 +48,17 @@ constructor (private val pivotServo : Servo,
      */
     private fun grab(loc: GrabPosition) { grabServo.position = loc.position }
 
-    fun move(grab: GrabPosition? = null, pivot: PivotPosition? = null) {
+    /**
+     * Pivot the tse grabber wrist effector to a specified position
+     * @param loc the position to pivot the wrist
+     */
+    private fun wrist(loc: WristPosition) { wristServo.position = loc.position }
+
+    fun move(grab: GrabPosition? = null, pivot: PivotPosition? = null, wrist: WristPosition? = null) {
         state = TseGrabberState.CUSTOM
         if (grab != null)  grab(grab)
         if (pivot != null) pivot(pivot)
+        if (wrist != null) wrist(wrist)
     }
 
     /**
@@ -55,25 +71,25 @@ constructor (private val pivotServo : Servo,
     {
 
         STORAGE(
-                action = { it, _ -> it.pivot(PivotPosition.STORAGE); it.grab(GrabPosition.STORAGE) },
+                action = { it, _ -> it.move(GrabPosition.STORAGE, PivotPosition.STORAGE, WristPosition.GROUND) },
                 prev = { RELEASE },
                 next = { GRAB_PREP }),
         GRAB_PREP(
-                action = { it, _ -> it.pivot(PivotPosition.GRAB); it.grab(GrabPosition.MID_GRAB) },
+                action = { it, _ -> it.move(GrabPosition.MID_GRAB, PivotPosition.GRAB, WristPosition.GROUND) },
                 prev = { STORAGE },
                 next = { GRAB }),
         GRAB(
-                action = { it, _ -> it.pivot(PivotPosition.GRAB); it.grab(GrabPosition.GRAB) },
+                action = { it, _ -> it.move(GrabPosition.GRAB, PivotPosition.GRAB, WristPosition.GROUND) },
                 prev = { GRAB_PREP },
                 next = { IN_AIR }),
         IN_AIR(
-                action = { it, _ -> it.pivot(PivotPosition.RELEASE); it.grab(GrabPosition.GRAB) },
+                action = { it, _ -> it.move(GrabPosition.GRAB, PivotPosition.RELEASE, WristPosition.HIGH) },
                 prev = { GRAB },
                 next = { RELEASE }),
         RELEASE(
-                action = { it, _ -> it.pivot(PivotPosition.RELEASE); it.grab(GrabPosition.MID_GRAB) },
+                action = { it, _ -> it.move(GrabPosition.MID_GRAB, PivotPosition.RELEASE, WristPosition.HIGH) },
                 prev = { IN_AIR },
-                next = { STORAGE  }),
+                next = { STORAGE }),
         CUSTOM(
                 action = null,
                 prev = { STORAGE },
